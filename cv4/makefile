@@ -1,13 +1,18 @@
 # Jozef Zivcic PV112 project
 
-binary = museum
-CXX = g++
-CXXFLAGS := -std=c++11 -lGL -lglut -lGLEW -lIL $(CXXFLAGS)
+CC = g++
+CC_FLAGS = -w -std=c++11 -Wall -Wextra
+L_FLAGS = -lGL -lglut -lGLEW -lIL
 
-result: $(binary)
+EXEC = museum
+SOURCES = $(wildcard *.cpp)
+OBJECTS = $(SOURCES:.cpp=.o)
 
-$(binary): museum.cpp PV112.h
-	$(CXX) -o $@ $< PV112.cpp $(CXXFLAGS)
+$(EXEC): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $(EXEC) $(L_FLAGS)
+
+%.o: %.cpp
+	$(CC) -c $(CC_FLAGS) $< -o $@
 
 clean:
-	rm $(binary)
+	rm -f $(EXEC) $(OBJECTS)

@@ -1,43 +1,21 @@
 // Project for PV112
+#include "locationstorage.h"
+#include "helpers.h"
 
 #include <iostream>
 #include "PV112.h"
-
 #define _USE_MATH_DEFINES
 #include <math.h>
-
 // Include GLEW, use static library
 #define GLEW_STATIC
 #include <GL/glew.h>
 #pragma comment(lib, "glew32s.lib") // Link with GLEW library
-
-// Include DevIL for image loading
-#if defined(_WIN32)
-#pragma comment(lib, "glew32s.lib")
-// On Windows, we use Unicode dll of DevIL
-// That also means we need to use wide strings
-#ifndef _UNICODE
-#define _UNICODE
-#include <IL/il.h>
-#undef _UNICODE
-#else
-#include <IL/il.h>
-#endif
-#pragma comment(lib, "DevIL.lib") // Link with DevIL library
-typedef wchar_t maybewchar;
-#define MAYBEWIDE(s) L##s
-#else // On Linux, we need regular (not wide) strings
-#include <IL/il.h>
-typedef char maybewchar;
-#define MAYBEWIDE(s) s
-#endif
-
 // Include FreeGLUT
 #include <GL/freeglut.h>
-
 // Include the most important GLM functions
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 
 using namespace std;
 using namespace PV112;
@@ -49,137 +27,7 @@ int win_height = 768;
 // Shader program and its uniforms
 GLuint program;
 
-class LocationStorage {
-private:
-  GLint model_matrix_loc;
-  GLint PVM_matrix_loc;
-  GLint normal_matrix_loc;
-
-  GLint material_ambient_color_loc;
-  GLint material_diffuse_color_loc;
-  GLint material_specular_color_loc;
-  GLint material_shininess_loc;
-
-  GLint light_position_loc;
-  GLint light_diffuse_color_loc;
-  GLint light_ambient_color_loc;
-  GLint light_specular_color_loc;
-
-  GLint eye_position_loc;
-
-  GLint wood_tex_loc;
-public:
-  LocationStorage() {}
-  ~LocationStorage() {}
-
-  GLint getModelMatrix() const {
-    return model_matrix_loc;
-  }
-
-  void setModelMatrix(const GLint& location) {
-    model_matrix_loc = location;
-  }
-
-  GLint getPVMMatrix() const {
-    return PVM_matrix_loc;
-  }
-
-  void setPVMMatrix(const GLint& location) {
-    PVM_matrix_loc = location;
-  }
-
-  GLint getNormalMatrix() const {
-    return normal_matrix_loc;
-  }
-
-  void setNormalMatrix(const GLint& location) {
-    normal_matrix_loc = location;
-  }
-
-  GLint getMaterialAmbientColor() const {
-    return material_ambient_color_loc;
-  }
-
-  void setMaterialAmbientColor(const GLint& location) {
-    material_ambient_color_loc = location;
-  }
-
-  GLint getMaterialDiffuseColor() const {
-    return material_diffuse_color_loc;
-  }
-
-  void setMaterialDiffuseColor(const GLint& location) {
-    material_diffuse_color_loc = location;
-  }
-
-  GLint getMaterialSpecularColor() const {
-    return material_specular_color_loc;
-  }
-
-  void setMaterialSpecularColor(const GLint& location) {
-    material_specular_color_loc = location;
-  }
-
-  GLint getMaterialShininess() const {
-    return material_shininess_loc;
-  }
-
-  void setMaterialShininess(const GLint& location) {
-    material_shininess_loc = location;
-  }
-
-  GLint getLightPosition() const {
-    return light_position_loc;
-  }
-
-  void setLightPosition(const GLint& location) {
-    light_position_loc = location;
-  }
-
-  GLint getLightDiffuseColor() const {
-    return light_diffuse_color_loc;
-  }
-
-  void setLightDiffuseColor(const GLint& location) {
-    light_diffuse_color_loc = location;
-  }
-
-  GLint getLightAmbientColor() const {
-    return light_ambient_color_loc;
-  }
-
-  void setLightAmbientColor(const GLint& location) {
-    light_ambient_color_loc = location;
-  }
-
-  GLint getLightSpecularColor() const {
-    return light_specular_color_loc;
-  }
-
-  void setLightSpecularColor(const GLint& location) {
-    light_specular_color_loc = location;
-  }
-
-  GLint getEyePosition() const {
-    return eye_position_loc;
-  }
-
-  void setEyePosition(const GLint& location) {
-    eye_position_loc = location;
-  }
-
-  GLint getWoodTex() const {
-    return wood_tex_loc;
-  }
-
-  void setWoodTex(const GLint& location) {
-    wood_tex_loc = location;
-  }
-};
-
 LocationStorage storage;
-
-
 
 // Simple geometries that we will use in this lecture
 PV112Geometry my_cube;
@@ -227,107 +75,7 @@ void mouse_moved(int x, int y)
   my_camera.OnMouseMoved(x, y);
 }
 
-// Loads a texture from file and calls glTexImage2D to se its data.
-// Returns true on success or false on failure.
-// NOTE 1a) Describe
-bool LoadAndSetTexture(const maybewchar *filename, GLenum target)
-{
-  // Create IL image
-  ILuint IL_tex;
-  ilGenImages(1, &IL_tex);
-
-  ilBindImage(IL_tex);
-
-  // Solve upside down textures
-  ilEnable(IL_ORIGIN_SET);
-  ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
-
-  // Load IL image
-  ILboolean success = ilLoadImage(filename);
-  if (!success)
-  {
-    ilBindImage(0);
-    ilDeleteImages(1, &IL_tex);
-    cerr << "Couldn't load texture: " << filename << endl;
-    return false;
-  }
-
-  // Get IL image parameters
-  int img_width = ilGetInteger(IL_IMAGE_WIDTH);
-  int img_height = ilGetInteger(IL_IMAGE_HEIGHT);
-  int img_format = ilGetInteger(IL_IMAGE_FORMAT);
-  int img_type = ilGetInteger(IL_IMAGE_TYPE);
-
-  // Choose internal format, format, and type for glTexImage2D
-  GLint internal_format = 0;
-  GLenum format = 0;
-  GLenum type = img_type; // IL constants matches GL constants
-  switch (img_format)
-  {
-  case IL_RGB:  internal_format = GL_RGB;  format = GL_RGB;  break;
-  case IL_RGBA: internal_format = GL_RGBA; format = GL_RGBA; break;
-  case IL_BGR:  internal_format = GL_RGB;  format = GL_BGR;  break;
-  case IL_BGRA: internal_format = GL_RGBA; format = GL_BGRA; break;
-  case IL_COLOR_INDEX:
-  case IL_ALPHA:
-  case IL_LUMINANCE:
-  case IL_LUMINANCE_ALPHA:
-      // Unsupported format
-      ilBindImage(0);
-      ilDeleteImages(1, &IL_tex);
-      cerr << "Texture " << filename << " has unsupported format\n";
-      return false;
-  }
-
-  // Set the data to OpenGL (assumes texture object is already bound)
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexImage2D(target, 0, internal_format, img_width, img_height, 0, format,
-          type, ilGetData());
-
-  // Unset and delete IL texture
-  ilBindImage(0);
-  ilDeleteImages(1, &IL_tex);
-
-  return true;
-}
-
-GLuint CreateAndLoadTexture(const maybewchar *filename)
-{
-  // Create OpenGL texture object
-  GLuint tex_obj;
-  glGenTextures(1, &tex_obj);
-  glBindTexture(GL_TEXTURE_2D, tex_obj);
-
-  // Load the data into OpenGL texture object
-  if (!LoadAndSetTexture(filename, GL_TEXTURE_2D))
-  {
-      glBindTexture(GL_TEXTURE_2D, 0);
-      glDeleteTextures(1, &tex_obj);
-      return 0;
-  }
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  return tex_obj;
-}
-
-
-// Initializes OpenGL stuff
-void init()
-{
-  glClearColor(0.3f, 0.4f, 0.3f, 0.0f);
-  glClearDepth(1.0);
-  glEnable(GL_DEPTH_TEST);
-
-  // Create shader program
-  program = CreateAndLinkProgram("vertex.glsl", "fragment.glsl");
-  if (0 == program)
-      WaitForEnterAndExit();
-
-  // Get attribute and uniform locations
-  int position_loc = glGetAttribLocation(program, "position");
-  int normal_loc = glGetAttribLocation(program, "normal");
-  int tex_coord_loc = glGetAttribLocation(program, "tex_coord");
-
+void initVariables() {
   storage.setModelMatrix(glGetUniformLocation(program, "model_matrix"));
   storage.setPVMMatrix(glGetUniformLocation(program, "PVM_matrix"));
   storage.setNormalMatrix(glGetUniformLocation(program, "normal_matrix"));
@@ -345,10 +93,25 @@ void init()
   storage.setEyePosition(glGetUniformLocation(program, "eye_position"));
 
   storage.setWoodTex(glGetUniformLocation(program, "wood_tex"));
+}
+void init()
+{
+  glClearColor(0.3f, 0.4f, 0.3f, 0.0f);
+  glClearDepth(1.0);
+  glEnable(GL_DEPTH_TEST);
 
-  // Create geometries
+  // Create shader program
+  program = CreateAndLinkProgram("vertex.glsl", "fragment.glsl");
+  if (0 == program)
+      WaitForEnterAndExit();
+
+  initVariables();
+
+  int position_loc = glGetAttribLocation(program, "position");
+  int normal_loc = glGetAttribLocation(program, "normal");
+  int tex_coord_loc = glGetAttribLocation(program, "tex_coord");
+
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
-  // Wood texture
 
   wood_tex = CreateAndLoadTexture(MAYBEWIDE("wood.jpg"));
   glBindTexture(GL_TEXTURE_2D, wood_tex);
@@ -360,7 +123,6 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-// Called when the window needs to be rerendered
 void render()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
