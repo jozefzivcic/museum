@@ -36,7 +36,7 @@ PV112Geometry my_rectangle;
 PV112Camera my_camera;
 
 // OpenGL texture objects
-GLuint wood_tex;
+GLuint wall_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -92,7 +92,7 @@ void initVariables() {
 
   storage.setEyePosition(glGetUniformLocation(program, "eye_position"));
 
-  storage.setWoodTex(glGetUniformLocation(program, "wood_tex"));
+  storage.setWallTex(glGetUniformLocation(program, "wall_tex"));
 }
 
 void init()
@@ -115,8 +115,8 @@ void init()
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
   my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
 
-  wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
-  glBindTexture(GL_TEXTURE_2D, wood_tex);
+  wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
+  glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -125,25 +125,46 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void render()
-{
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix) {
+  glm::mat4 PVM_matrix = PV_matrix * model_matrix;
+  glm::mat3 normal_matrix = getNormalMatrix(model_matrix);
+  glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
+  glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
+  glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
+  DrawGeometry(my_rectangle);
+}
 
-  glm::mat4 projection_matrix, view_matrix, model_matrix, PVM_matrix;
-  glm::mat3 normal_matrix;
+void renderRoom(const glm::mat4& projection_matrix, const glm::mat4& view_matrix,
+const glm::vec3& scale) {
+  glBindVertexArray(my_rectangle.VAO);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, wall_tex);
+  glUniform1i(storage.getWallTex(), 0);
+  glm::mat4 PV_matrix = projection_matrix * view_matrix;
 
-  projection_matrix = glm::perspective(glm::radians(45.0f),
-        float(win_width) / float(win_height), 0.1f, 100.0f);
-  view_matrix = glm::lookAt(my_camera.GetEyePosition(),
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+  // glEnable(GL_CULL_FACE);
+  // glCullFace(GL_BACK);
 
-  // Light position, with a simple animation
+  //left wall
+  glm::mat4 model_matrix;
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(0.0,1.0,0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y / 2.0, -scale.x / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y,0));
+  renderRectangle(PV_matrix, model_matrix);
+
+  // right wall
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(0.0,1.0,0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y / 2.0, -scale.x / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y,0));
+  renderRectangle(PV_matrix, model_matrix);
+
+  //glBindVertexArray(0);
+}
+
+void renderLight() {
   glm::vec4 light_pos =  glm::vec4(0.0f, 10.0f, 0.0f, 1.0f);
-
-  glUseProgram(program);
-
-  glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.GetEyePosition()));
-
   glUniform4fv(storage.getLightPosition(), 1, glm::value_ptr(light_pos));
   glUniform3f(storage.getLightAmbientColor(), 0.3f, 0.3f, 0.3f);
   glUniform3f(storage.getLightDiffuseColor(), 1.0f, 1.0f, 1.0f);
@@ -153,38 +174,38 @@ void render()
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
+}
 
+void render()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glUseProgram(program);
+
+  glm::mat4 projection_matrix, view_matrix, model_matrix, PVM_matrix;
+  glm::mat3 normal_matrix;
+
+  projection_matrix = glm::perspective(glm::radians(45.0f),
+        float(win_width) / float(win_height), 0.1f, 100.0f);
+  view_matrix = glm::lookAt(my_camera.GetEyePosition(),
+        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+  glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.GetEyePosition()));
+
+  renderLight();
+  renderRoom(projection_matrix, view_matrix, glm::vec3(5.0, 2.5, 10.0));
   // Cube
   glBindVertexArray(my_cube.VAO);
-
   model_matrix = glm::mat4(1.0f);
 
-  //zavolame aktivnu texturovaciu jednotku
-  glActiveTexture(GL_TEXTURE0);
-  // zmenime podla textury
-  glBindTexture(GL_TEXTURE_2D, wood_tex);
-  //tento sampler bude pracovat s jednotkou 0
-  glUniform1i(storage.getWoodTex(), 0);
+
 
   PVM_matrix = projection_matrix * view_matrix * model_matrix;
-  normal_matrix = glm::inverse(glm::transpose(glm::mat3(model_matrix)));
+  normal_matrix = getNormalMatrix(model_matrix);
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
   glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
   DrawGeometry(my_cube);
 
-  glBindVertexArray(my_rectangle.VAO);
-  // glEnable(GL_CULL_FACE);
-  // glCullFace(GL_BACK);
-  model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::scale(model_matrix, glm::vec3(10.0, 10.0, 0.0));
-  model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
-  PVM_matrix = projection_matrix * view_matrix * model_matrix;
-  normal_matrix = glm::inverse(glm::transpose(glm::mat3(model_matrix)));
-  glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
-  glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
-  glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-  DrawGeometry(my_rectangle);
   glBindVertexArray(0);
   glUseProgram(0);
 

@@ -21,7 +21,7 @@ private:
 
   GLint eye_position_loc;
 
-  GLint wood_tex_loc;
+  GLint wall_tex_loc;
 public:
   LocationStorage();
   ~LocationStorage();
@@ -74,8 +74,8 @@ public:
 
   void setEyePosition(const GLint& location);
 
-  GLint getWoodTex() const;
+  GLint getWallTex() const;
 
-  void setWoodTex(const GLint& location);
+  void setWallTex(const GLint& location);
 };
 #endif

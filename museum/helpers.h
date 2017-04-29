@@ -21,7 +21,11 @@ typedef char maybewchar;
 #define MAYBEWIDE(s) s
 #endif
 
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 bool LoadAndSetTexture(const maybewchar *filename, GLenum target);
 GLuint CreateAndLoadTexture(const maybewchar *filename);
+glm::mat3 getNormalMatrix(const glm::mat4& matrix);
 
 #endif

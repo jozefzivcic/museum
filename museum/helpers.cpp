@@ -82,3 +82,7 @@ GLuint CreateAndLoadTexture(const maybewchar *filename)
 
   return tex_obj;
 }
+
+glm::mat3 getNormalMatrix(const glm::mat4& matrix) {
+  return glm::inverse(glm::transpose(glm::mat3(matrix)));
+}
