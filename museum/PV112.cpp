@@ -18,6 +18,7 @@
 #include "cube.inl"
 #include "sphere.inl"
 #include "teapot.inl"
+#include "rectangle.inl"
 
 using namespace std;
 
@@ -405,6 +406,61 @@ PV112Geometry CreateTeapot(GLint position_location, GLint normal_location, GLint
     return geometry;
 }
 
+PV112Geometry CreateRectangle(GLint position_location, GLint normal_location,
+  GLint tex_coord_location) {
+
+  PV112Geometry geometry;
+
+  // Create a single buffer for vertex data
+  glGenBuffers(1, &geometry.VertexBuffers[0]);
+  glBindBuffer(GL_ARRAY_BUFFER, geometry.VertexBuffers[0]);
+  glBufferData(GL_ARRAY_BUFFER, rectangle_vertices_count * sizeof(float) * 8,
+  rectangle_vertices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  geometry.VertexBuffers[1] = 0;
+  geometry.VertexBuffers[2] = 0;
+
+  // Create a buffer for indices
+  glGenBuffers(1, &geometry.IndexBuffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.IndexBuffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, rectangle_indices_count * sizeof(unsigned int),
+  rectangle_indices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  // Create a vertex array object for the geometry
+  glGenVertexArrays(1, &geometry.VAO);
+
+  // Set the parameters of the geometry
+  glBindVertexArray(geometry.VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, geometry.VertexBuffers[0]);
+  if (position_location >= 0)
+  {
+      glEnableVertexAttribArray(position_location);
+      glVertexAttribPointer(position_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+  }
+  if (normal_location >= 0)
+  {
+      glEnableVertexAttribArray(normal_location);
+      glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (const void *)(sizeof(float) * 3));
+  }
+  if (tex_coord_location >= 0)
+  {
+      glEnableVertexAttribArray(tex_coord_location);
+      glVertexAttribPointer(tex_coord_location, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (const void *)(sizeof(float) * 6));
+  }
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.IndexBuffer);
+
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  geometry.Mode = GL_TRIANGLES;
+  geometry.DrawArraysCount = 0;
+  geometry.DrawElementsCount = rectangle_indices_count;
+
+  return geometry;
+}
 //--------------------------
 //----    OBJ LOADER    ----
 //--------------------------

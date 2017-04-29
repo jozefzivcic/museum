@@ -29,8 +29,8 @@ GLuint program;
 
 LocationStorage storage;
 
-// Simple geometries that we will use in this lecture
 PV112Geometry my_cube;
+PV112Geometry my_rectangle;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -94,6 +94,7 @@ void initVariables() {
 
   storage.setWoodTex(glGetUniformLocation(program, "wood_tex"));
 }
+
 void init()
 {
   glClearColor(0.3f, 0.4f, 0.3f, 0.0f);
@@ -112,12 +113,13 @@ void init()
   int tex_coord_loc = glGetAttribLocation(program, "tex_coord");
 
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
+  my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
 
-  wood_tex = CreateAndLoadTexture(MAYBEWIDE("wood.jpg"));
+  wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   glBindTexture(GL_TEXTURE_2D, wood_tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -147,6 +149,11 @@ void render()
   glUniform3f(storage.getLightDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getLightSpecularColor(), 1.0f, 1.0f, 1.0f);
 
+  glUniform3f(storage.getMaterialAmbientColor(), 1.0f, 1.0f, 1.0f);
+  glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
+  glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
+  glUniform1f(storage.getMaterialShininess(), 40.0f);
+
   // Cube
   glBindVertexArray(my_cube.VAO);
 
@@ -159,20 +166,25 @@ void render()
   //tento sampler bude pracovat s jednotkou 0
   glUniform1i(storage.getWoodTex(), 0);
 
-
-  glUniform3f(storage.getMaterialAmbientColor(), 1.0f, 1.0f, 1.0f);
-  glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
-  glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
-  glUniform1f(storage.getMaterialShininess(), 40.0f);
-
   PVM_matrix = projection_matrix * view_matrix * model_matrix;
   normal_matrix = glm::inverse(glm::transpose(glm::mat3(model_matrix)));
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
   glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-
   DrawGeometry(my_cube);
 
+  glBindVertexArray(my_rectangle.VAO);
+  // glEnable(GL_CULL_FACE);
+  // glCullFace(GL_BACK);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::scale(model_matrix, glm::vec3(10.0, 10.0, 0.0));
+  model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
+  PVM_matrix = projection_matrix * view_matrix * model_matrix;
+  normal_matrix = glm::inverse(glm::transpose(glm::mat3(model_matrix)));
+  glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
+  glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
+  glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
+  DrawGeometry(my_rectangle);
   glBindVertexArray(0);
   glUseProgram(0);
 

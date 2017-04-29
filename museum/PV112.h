@@ -134,6 +134,7 @@ PV112Geometry CreateSphere(GLint position_location, GLint normal_location = -1, 
 /// obtained by glGetAttribLocation. Use -1 if not necessary.
 PV112Geometry CreateTeapot(GLint position_location, GLint normal_location = -1, GLint tex_coord_location = -1);
 
+PV112Geometry CreateRectangle(GLint position_location, GLint normal_location = -1, GLint tex_coord_location = -1);
 //--------------------------
 //----    OBJ LOADER    ----
 //--------------------------
