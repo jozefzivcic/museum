@@ -106,3 +106,19 @@ GLint LocationStorage::getWallTex() const {
 void LocationStorage::setWallTex(const GLint& location) {
   wall_tex_loc = location;
 }
+
+GLint LocationStorage::getPavingTex() const {
+  return paving_tex_loc;
+}
+
+void LocationStorage::setPavingTex(const GLint& location) {
+  paving_tex_loc = location;
+}
+
+GLint LocationStorage::getTexRepeatLocation() const {
+  return tex_repeat_loc;
+}
+
+void LocationStorage::setTexRepeatLocation(const GLint& location) {
+  tex_repeat_loc = location;
+}

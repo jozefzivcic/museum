@@ -7,6 +7,7 @@ in vec2 tex_coord;
 uniform mat4 model_matrix;
 uniform mat4 PVM_matrix;
 uniform mat3 normal_matrix;
+uniform float tex_repeat_factor;
 
 out vec3 VS_normal_ws;
 out vec3 VS_position_ws;
@@ -14,7 +15,7 @@ out vec2 VS_tex_coord;
 
 void main()
 {
-    VS_tex_coord = tex_coord;
+    VS_tex_coord = tex_repeat_factor * tex_coord;
 
     VS_position_ws = vec3(model_matrix * position);
     VS_normal_ws = normalize(normal_matrix * normal);

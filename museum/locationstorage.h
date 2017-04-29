@@ -22,6 +22,8 @@ private:
   GLint eye_position_loc;
 
   GLint wall_tex_loc;
+  GLint paving_tex_loc;
+  GLint tex_repeat_loc;
 public:
   LocationStorage();
   ~LocationStorage();
@@ -77,5 +79,13 @@ public:
   GLint getWallTex() const;
 
   void setWallTex(const GLint& location);
+
+  GLint getPavingTex() const;
+
+  void setPavingTex(const GLint& location);
+
+  GLint getTexRepeatLocation() const;
+
+  void setTexRepeatLocation(const GLint& location);
 };
 #endif

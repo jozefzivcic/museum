@@ -19,6 +19,7 @@ uniform vec3 light_specular_color;
 uniform vec3 eye_position;
 
 uniform sampler2D wall_tex;
+uniform sampler2D paving_tex;
 
 void main()
 {
