@@ -76,13 +76,9 @@ public:
 
   void setEyePosition(const GLint& location);
 
-  GLint getWallTex() const;
+  GLint getMyTex() const;
 
-  void setWallTex(const GLint& location);
-
-  GLint getPavingTex() const;
-
-  void setPavingTex(const GLint& location);
+  void setMyTex(const GLint& location);
 
   GLint getTexRepeatLocation() const;
 

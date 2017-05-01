@@ -18,12 +18,11 @@ uniform vec3 light_specular_color;
 
 uniform vec3 eye_position;
 
-uniform sampler2D wall_tex;
-uniform sampler2D paving_tex;
+uniform sampler2D my_tex;
 
 void main()
 {
-    vec3 wood_color = texture(wall_tex, VS_tex_coord).rgb;
+    vec3 wood_color = texture(my_tex, VS_tex_coord).rgb;
 
     vec3 tex_color = wood_color;
     vec3 N = normalize(VS_normal_ws);

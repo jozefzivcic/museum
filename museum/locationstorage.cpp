@@ -99,20 +99,12 @@ void LocationStorage::setEyePosition(const GLint& location) {
   eye_position_loc = location;
 }
 
-GLint LocationStorage::getWallTex() const {
+GLint LocationStorage::getMyTex() const {
   return wall_tex_loc;
 }
 
-void LocationStorage::setWallTex(const GLint& location) {
+void LocationStorage::setMyTex(const GLint& location) {
   wall_tex_loc = location;
-}
-
-GLint LocationStorage::getPavingTex() const {
-  return paving_tex_loc;
-}
-
-void LocationStorage::setPavingTex(const GLint& location) {
-  paving_tex_loc = location;
 }
 
 GLint LocationStorage::getTexRepeatLocation() const {
