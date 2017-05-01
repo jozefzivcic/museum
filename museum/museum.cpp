@@ -42,7 +42,7 @@ GLuint paving_tex;
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
 
-glm::vec3 size_vector = glm::vec3(20.0, 5, 40.0);
+glm::vec3 size_vector = glm::vec3(40.0, 10, 80.0);
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -96,7 +96,8 @@ void initVariables() {
   storage.setEyePosition(glGetUniformLocation(program, "eye_position"));
 
   storage.setMyTex(glGetUniformLocation(program, "my_tex"));
-  storage.setTexRepeatLocation(glGetUniformLocation(program, "tex_repeat_factor"));
+  storage.setTexRepeatXLocation(glGetUniformLocation(program, "tex_repeat_factor_x"));
+  storage.setTexRepeatYLocation(glGetUniformLocation(program, "tex_repeat_factor_y"));
 }
 
 void init()
@@ -140,13 +141,14 @@ void init()
 }
 
 void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
-  float tex_repeat_factor) {
+  float tex_repeat_factor_x, float tex_repeat_factor_y) {
   glm::mat4 PVM_matrix = PV_matrix * model_matrix;
   glm::mat3 normal_matrix = getNormalMatrix(model_matrix);
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
   glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-  glUniform1f(storage.getTexRepeatLocation(), tex_repeat_factor);
+  glUniform1f(storage.getTexRepeatXLocation(), tex_repeat_factor_x);
+  glUniform1f(storage.getTexRepeatYLocation(), tex_repeat_factor_y);
   DrawGeometry(my_rectangle);
 }
 
@@ -167,27 +169,27 @@ const glm::vec3& scale) {
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.x / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y, 0));
-  renderRectangle(PV_matrix, model_matrix, 5.0);
+  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // right wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.x / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y,0));
-  renderRectangle(PV_matrix, model_matrix, 5.0);
+  renderRectangle(PV_matrix, model_matrix,  2.0, 2.0);
 
   // back wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.z / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.y,0));
-  renderRectangle(PV_matrix, model_matrix, 5.0);
+  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // front wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.z / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.y,0));
-  renderRectangle(PV_matrix, model_matrix, 5.0);
+  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // bottom paving
   glActiveTexture(GL_TEXTURE0);
@@ -198,7 +200,9 @@ const glm::vec3& scale) {
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(1.0,0.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.z / 2.0,0));
-  renderRectangle(PV_matrix, model_matrix, 7.0);
+  float ratio = scale.z / scale.x;
+  int repeat = 5;
+  renderRectangle(PV_matrix, model_matrix, repeat, repeat* ratio);
   //glBindVertexArray(0);
 }
 
@@ -241,7 +245,8 @@ void render()
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
   glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-  glUniform1f(storage.getTexRepeatLocation(), 1.0);
+  glUniform1f(storage.getTexRepeatXLocation(), 1.0);
+  glUniform1f(storage.getTexRepeatYLocation(), 1.0);
   DrawGeometry(my_cube);
 
   glBindVertexArray(0);

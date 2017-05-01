@@ -107,10 +107,18 @@ void LocationStorage::setMyTex(const GLint& location) {
   wall_tex_loc = location;
 }
 
-GLint LocationStorage::getTexRepeatLocation() const {
-  return tex_repeat_loc;
+GLint LocationStorage::getTexRepeatXLocation() const {
+  return tex_repeat_x_loc;
 }
 
-void LocationStorage::setTexRepeatLocation(const GLint& location) {
-  tex_repeat_loc = location;
+void LocationStorage::setTexRepeatXLocation(const GLint& location) {
+  tex_repeat_x_loc = location;
+}
+
+GLint LocationStorage::getTexRepeatYLocation() const {
+  return tex_repeat_y_loc;
+}
+
+void LocationStorage::setTexRepeatYLocation(const GLint& location) {
+  tex_repeat_y_loc = location;
 }

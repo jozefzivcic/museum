@@ -23,7 +23,8 @@ private:
 
   GLint wall_tex_loc;
   GLint paving_tex_loc;
-  GLint tex_repeat_loc;
+  GLint tex_repeat_x_loc;
+  GLint tex_repeat_y_loc;
 public:
   LocationStorage();
   ~LocationStorage();
@@ -80,8 +81,12 @@ public:
 
   void setMyTex(const GLint& location);
 
-  GLint getTexRepeatLocation() const;
+  GLint getTexRepeatXLocation() const;
 
-  void setTexRepeatLocation(const GLint& location);
+  void setTexRepeatXLocation(const GLint& location);
+
+  GLint getTexRepeatYLocation() const;
+
+  void setTexRepeatYLocation(const GLint& location);
 };
 #endif
