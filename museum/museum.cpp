@@ -38,11 +38,13 @@ PV112Camera my_camera;
 // OpenGL texture objects
 GLuint wall_tex;
 GLuint paving_tex;
+GLuint mona_lisa_tex;
+GLuint painting_frame_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
 
-glm::vec3 size_vector = glm::vec3(40.0, 10, 80.0);
+glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -122,12 +124,15 @@ void init()
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
+  mona_lisa_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/mona_lisa.jpg"));
+  painting_frame_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/painting_frame.png"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -136,6 +141,25 @@ void init()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, mona_lisa_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -152,8 +176,8 @@ void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
   DrawGeometry(my_rectangle);
 }
 
-void renderRoom(const glm::mat4& projection_matrix, const glm::mat4& view_matrix,
-const glm::vec3& scale) {
+void renderRoom(const glm::mat4& projection_matrix,
+  const glm::mat4& view_matrix) {
   glBindVertexArray(my_rectangle.VAO);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, wall_tex);
@@ -167,28 +191,28 @@ const glm::vec3& scale) {
   glm::mat4 model_matrix;
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(0.0,1.0,0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.x / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y, 0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y, 0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // right wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(0.0,1.0,0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.x / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x, scale.y,0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y,0));
   renderRectangle(PV_matrix, model_matrix,  2.0, 2.0);
 
   // back wall
   model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.z / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.y,0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // front wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, scale.y, -scale.z / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.y,0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // bottom paving
@@ -199,10 +223,10 @@ const glm::vec3& scale) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(1.0,0.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(scale.x / 2.0, scale.z / 2.0,0));
-  float ratio = scale.z / scale.x;
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,0));
+  float ratio = size_vector.z / size_vector.x;
   int repeat = 5;
-  renderRectangle(PV_matrix, model_matrix, repeat, repeat* ratio);
+  renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
   //glBindVertexArray(0);
 }
 
@@ -217,6 +241,29 @@ void renderLight() {
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
+}
+
+void renderPictures(const glm::mat4& projection_matrix,
+  const glm::mat4& view_matrix) {
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, mona_lisa_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glm::mat4 PV_matrix = projection_matrix * view_matrix;
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0 + 0.1));
+  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 3.0,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0,0.0,1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(size_vector.y, 0.0, -size_vector.z / 2.0 + 0.2));
+  model_matrix = glm::scale(model_matrix, glm::vec3(4.0,3.0,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 }
 
 void render()
@@ -235,8 +282,14 @@ void render()
   glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.GetEyePosition()));
 
   renderLight();
-  renderRoom(projection_matrix, view_matrix, size_vector);
+  renderRoom(projection_matrix, view_matrix);
+  renderPictures(projection_matrix, view_matrix);
+
   // Cube
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, paving_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
   glBindVertexArray(my_cube.VAO);
   model_matrix = glm::mat4(1.0f);
 

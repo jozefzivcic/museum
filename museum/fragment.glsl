@@ -22,9 +22,11 @@ uniform sampler2D my_tex;
 
 void main()
 {
-    vec3 wood_color = texture(my_tex, VS_tex_coord).rgb;
-
-    vec3 tex_color = wood_color;
+    vec4 tex_color_alpha = texture(my_tex, VS_tex_coord);
+    vec3 tex_color = tex_color_alpha.rgb;
+    float alpha = tex_color_alpha.a;
+    if (alpha == 0.0)
+      discard;
     vec3 N = normalize(VS_normal_ws);
     vec3 Eye = normalize(eye_position - VS_position_ws);
 
