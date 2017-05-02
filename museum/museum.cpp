@@ -41,6 +41,7 @@ GLuint wall_tex;
 GLuint paving_tex;
 GLuint mona_lisa_tex;
 GLuint painting_frame_tex;
+GLuint bronze_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -122,12 +123,13 @@ void init()
 
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
   my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
-  statue_of_liberty = LoadOBJ("./obj_files/stat.obj",position_loc, normal_loc, tex_coord_loc);
+  statue_of_liberty = LoadOBJ("./obj_files/statue_of_liberty.obj",position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
   mona_lisa_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/mona_lisa.jpg"));
   painting_frame_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/painting_frame.png"));
+  bronze_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/bronze.jpg"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -157,6 +159,15 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, bronze_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -289,7 +300,7 @@ void render()
 
   // Cube
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, paving_tex);
+  glBindTexture(GL_TEXTURE_2D, bronze_tex);
   glUniform1i(storage.getMyTex(), 0);
 
   glBindVertexArray(statue_of_liberty.VAO);
