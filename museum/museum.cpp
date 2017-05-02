@@ -31,6 +31,7 @@ LocationStorage storage;
 
 PV112Geometry my_cube;
 PV112Geometry my_rectangle;
+PV112Geometry statue_of_liberty;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -121,6 +122,7 @@ void init()
 
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
   my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
+  statue_of_liberty = LoadOBJ("./obj_files/stat.obj",position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -290,7 +292,7 @@ void render()
   glBindTexture(GL_TEXTURE_2D, paving_tex);
   glUniform1i(storage.getMyTex(), 0);
 
-  glBindVertexArray(my_cube.VAO);
+  glBindVertexArray(statue_of_liberty.VAO);
   model_matrix = glm::mat4(1.0f);
 
   PVM_matrix = projection_matrix * view_matrix * model_matrix;
@@ -300,7 +302,7 @@ void render()
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
   glUniform1f(storage.getTexRepeatXLocation(), 1.0);
   glUniform1f(storage.getTexRepeatYLocation(), 1.0);
-  DrawGeometry(my_cube);
+  DrawGeometry(statue_of_liberty);
 
   glBindVertexArray(0);
   glUseProgram(0);
