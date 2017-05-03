@@ -32,6 +32,7 @@ LocationStorage storage;
 PV112Geometry my_cube;
 PV112Geometry my_rectangle;
 PV112Geometry statue_of_liberty;
+PV112Geometry marble_statue;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -123,7 +124,8 @@ void init()
 
   my_cube = CreateCube(position_loc, normal_loc, tex_coord_loc);
   my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
-  statue_of_liberty = LoadOBJ("./obj_files/statue_of_liberty.obj",position_loc, normal_loc, tex_coord_loc);
+  statue_of_liberty = LoadOBJ("./obj_files/statue_of_liberty.obj", position_loc, normal_loc, tex_coord_loc);
+  marble_statue = LoadOBJ("./obj_files/marble_statue.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -177,26 +179,28 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
-  float tex_repeat_factor_x, float tex_repeat_factor_y) {
+void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
+const float& tex_repeat_x = 1.0, const float& tex_repeat_y = 1.0) {
   glm::mat4 PVM_matrix = PV_matrix * model_matrix;
   glm::mat3 normal_matrix = getNormalMatrix(model_matrix);
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
   glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-  glUniform1f(storage.getTexRepeatXLocation(), tex_repeat_factor_x);
-  glUniform1f(storage.getTexRepeatYLocation(), tex_repeat_factor_y);
+  glUniform1f(storage.getTexRepeatXLocation(), tex_repeat_x);
+  glUniform1f(storage.getTexRepeatYLocation(), tex_repeat_y);
+}
+
+void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
+  float tex_repeat_factor_x, float tex_repeat_factor_y) {
+  sendDataToShaders(PV_matrix, model_matrix, tex_repeat_factor_x, tex_repeat_factor_y);
   DrawGeometry(my_rectangle);
 }
 
-void renderRoom(const glm::mat4& projection_matrix,
-  const glm::mat4& view_matrix) {
+void renderRoom(const glm::mat4& PV_matrix) {
   glBindVertexArray(my_rectangle.VAO);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glUniform1i(storage.getMyTex(), 0);
-  glm::mat4 PV_matrix = projection_matrix * view_matrix;
-
   //  glEnable(GL_CULL_FACE);
   //  glCullFace(GL_BACK);
 
@@ -256,13 +260,11 @@ void renderLight() {
   glUniform1f(storage.getMaterialShininess(), 40.0f);
 }
 
-void renderPictures(const glm::mat4& projection_matrix,
-  const glm::mat4& view_matrix) {
+void renderPictures(const glm::mat4& PV_matrix) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, mona_lisa_tex);
   glUniform1i(storage.getMyTex(), 0);
 
-  glm::mat4 PV_matrix = projection_matrix * view_matrix;
   glm::mat4 model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0 + 0.1));
   model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 3.0,0));
@@ -277,6 +279,22 @@ void renderPictures(const glm::mat4& projection_matrix,
   model_matrix = glm::translate(model_matrix, glm::vec3(size_vector.y, 0.0, -size_vector.z / 2.0 + 0.2));
   model_matrix = glm::scale(model_matrix, glm::vec3(4.0,3.0,0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+}
+
+void renderStatues(const glm::mat4& PV_matrix) {
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, bronze_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(statue_of_liberty.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)),
+  glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, - size_vector.x / 2.0 + 0.1));
+  model_matrix = glm::scale(model_matrix, glm::vec3(3.0, 3.0, 3.0));
+  sendDataToShaders(PV_matrix, model_matrix);
+  DrawGeometry(statue_of_liberty);
+  //glBindVertexArray(0);
 }
 
 void render()
@@ -294,16 +312,19 @@ void render()
 
   glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.GetEyePosition()));
 
+  glm::mat4 PV_matrix = projection_matrix * view_matrix;
+
   renderLight();
-  renderRoom(projection_matrix, view_matrix);
-  renderPictures(projection_matrix, view_matrix);
+  renderRoom(PV_matrix);
+  renderPictures(PV_matrix);
+  renderStatues(PV_matrix);
 
   // Cube
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, bronze_tex);
+  glBindTexture(GL_TEXTURE_2D, wall_tex);
   glUniform1i(storage.getMyTex(), 0);
 
-  glBindVertexArray(statue_of_liberty.VAO);
+  glBindVertexArray(my_cube.VAO);
   model_matrix = glm::mat4(1.0f);
 
   PVM_matrix = projection_matrix * view_matrix * model_matrix;
@@ -313,7 +334,7 @@ void render()
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
   glUniform1f(storage.getTexRepeatXLocation(), 1.0);
   glUniform1f(storage.getTexRepeatYLocation(), 1.0);
-  DrawGeometry(statue_of_liberty);
+  DrawGeometry(my_cube);
 
   glBindVertexArray(0);
   glUseProgram(0);
