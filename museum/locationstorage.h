@@ -25,6 +25,9 @@ private:
   GLint paving_tex_loc;
   GLint tex_repeat_x_loc;
   GLint tex_repeat_y_loc;
+
+  GLint tex_procedural_type;
+  
 public:
   LocationStorage();
   ~LocationStorage();
@@ -88,5 +91,9 @@ public:
   GLint getTexRepeatYLocation() const;
 
   void setTexRepeatYLocation(const GLint& location);
+
+  GLint getProceduralTexType() const;
+
+  void setProceduralTexType(const GLint& location);
 };
 #endif

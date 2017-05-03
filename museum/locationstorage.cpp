@@ -122,3 +122,11 @@ GLint LocationStorage::getTexRepeatYLocation() const {
 void LocationStorage::setTexRepeatYLocation(const GLint& location) {
   tex_repeat_y_loc = location;
 }
+
+GLint LocationStorage::getProceduralTexType() const {
+  return tex_procedural_type;
+}
+
+void LocationStorage::setProceduralTexType(const GLint& location) {
+  tex_procedural_type = location;
+}

@@ -103,6 +103,7 @@ void initVariables() {
   storage.setMyTex(glGetUniformLocation(program, "my_tex"));
   storage.setTexRepeatXLocation(glGetUniformLocation(program, "tex_repeat_factor_x"));
   storage.setTexRepeatYLocation(glGetUniformLocation(program, "tex_repeat_factor_y"));
+  storage.setProceduralTexType(glGetUniformLocation(program, "procedural_tex_type"));
 }
 
 void init()
@@ -180,7 +181,8 @@ void init()
 }
 
 void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
-const float& tex_repeat_x = 1.0, const float& tex_repeat_y = 1.0) {
+const float& tex_repeat_x = 1.0, const float& tex_repeat_y = 1.0,
+const int& procedural_tex_type = 0) {
   glm::mat4 PVM_matrix = PV_matrix * model_matrix;
   glm::mat3 normal_matrix = getNormalMatrix(model_matrix);
   glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -188,6 +190,7 @@ const float& tex_repeat_x = 1.0, const float& tex_repeat_y = 1.0) {
   glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
   glUniform1f(storage.getTexRepeatXLocation(), tex_repeat_x);
   glUniform1f(storage.getTexRepeatYLocation(), tex_repeat_y);
+  glUniform1i(storage.getProceduralTexType(), procedural_tex_type);
 }
 
 void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
@@ -290,10 +293,17 @@ void renderStatues(const glm::mat4& PV_matrix) {
   glm::mat4 model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)),
   glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, - size_vector.x / 2.0 + 0.1));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, - size_vector.x / 2.0 + 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(3.0, 3.0, 3.0));
   sendDataToShaders(PV_matrix, model_matrix);
   DrawGeometry(statue_of_liberty);
+
+  glBindVertexArray(marble_statue.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 1.0, 0.0));
+  //model_matrix = glm::scale(model_matrix, glm::vec3(3.0, 3.0, 3.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
+  DrawGeometry(marble_statue);
   //glBindVertexArray(0);
 }
 
@@ -326,14 +336,7 @@ void render()
 
   glBindVertexArray(my_cube.VAO);
   model_matrix = glm::mat4(1.0f);
-
-  PVM_matrix = projection_matrix * view_matrix * model_matrix;
-  normal_matrix = getNormalMatrix(model_matrix);
-  glUniformMatrix4fv(storage.getModelMatrix(), 1, GL_FALSE, glm::value_ptr(model_matrix));
-  glUniformMatrix4fv(storage.getPVMMatrix(), 1, GL_FALSE, glm::value_ptr(PVM_matrix));
-  glUniformMatrix3fv(storage.getNormalMatrix(), 1, GL_FALSE, glm::value_ptr(normal_matrix));
-  glUniform1f(storage.getTexRepeatXLocation(), 1.0);
-  glUniform1f(storage.getTexRepeatYLocation(), 1.0);
+  sendDataToShaders(PV_matrix, model_matrix);
   DrawGeometry(my_cube);
 
   glBindVertexArray(0);
