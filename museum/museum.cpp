@@ -457,14 +457,10 @@ void renderStatues(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   glBindVertexArray(statue_of_liberty.VAO);
-  float phi = asin(size_vector.z / sqrt(pow(size_vector.x, 2) + pow(size_vector.z, 2)));
-  float move_z = sqrt(pow(size_vector.x, 2) + pow(size_vector.z, 2)) / 2.0 - 5.0;
-  float move_x = sqrt(pow(move_z, 2) + pow(move_z, 2) - 2 * pow(move_z,2) * cos(phi - glm::radians(45.0))) + 1.0;
   glm::mat4 model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(45.0)),
-  glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(move_x, 0.0, -move_z));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 0.0, -size_vector.z / 2.0 + 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(5.0, 5.0, 5.0));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(45.0)), glm::vec3(0.0, 1.0, 0.0));
   sendDataToShaders(PV_matrix, model_matrix);
   DrawGeometry(statue_of_liberty);
 
@@ -492,6 +488,7 @@ void renderStatues(const glm::mat4& PV_matrix) {
   glBindVertexArray(cup.VAO);
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.0, -size_vector.z / 2.0 + 2.0 + distance * 2));
   model_matrix = glm::rotate(model_matrix, app_time_s, glm::vec3(0.0, 1.0, 0.0));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(cup);
