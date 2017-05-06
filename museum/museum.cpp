@@ -49,6 +49,8 @@ float app_time_s = 0.0f;
 
 glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
 
+glm::vec3 my_position = glm::vec3(0.0,2.0,5.0);
+
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
 {
@@ -67,6 +69,22 @@ void key_pressed(unsigned char key, int mouseX, int mouseY)
       break;
   case 't':
       glutFullScreenToggle();
+      break;
+  case 'w':
+      my_camera.move(Moving::FORWARD);
+      glutPostRedisplay();
+      break;
+  case 's':
+      my_camera.move(Moving::BACKWARD);
+      glutPostRedisplay();
+      break;
+  case 'a':
+      my_camera.move(Moving::LEFT);
+      glutPostRedisplay();
+      break;
+  case 'd':
+      my_camera.move(Moving::RIGHT);
+      glutPostRedisplay();
       break;
   }
 }
@@ -315,12 +333,13 @@ void render()
   glm::mat4 projection_matrix, view_matrix, model_matrix, PVM_matrix;
   glm::mat3 normal_matrix;
 
-  projection_matrix = glm::perspective(glm::radians(45.0f),
+  projection_matrix = glm::perspective(glm::radians(50.0f),
         float(win_width) / float(win_height), 0.1f, 100.0f);
-  view_matrix = glm::lookAt(my_camera.GetEyePosition(),
-        glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-  glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.GetEyePosition()));
+  view_matrix = glm::lookAt(my_camera.getPosition(),
+        my_camera.GetEyePosition(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+  glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.getPosition()));
 
   glm::mat4 PV_matrix = projection_matrix * view_matrix;
 

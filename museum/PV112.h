@@ -157,6 +157,8 @@ bool ParseOBJFile(const char *file_name, std::vector<glm::vec3> &out_vertices, s
 /// obtained by glGetAttribLocation. Use -1 if not necessary.
 PV112Geometry LoadOBJ(const char *file_name, GLint position_location, GLint normal_location = -1, GLint tex_coord_location = -1);
 
+
+enum class Moving { FORWARD, BACKWARD, LEFT, RIGHT };
 //-----------------------------------------
 //----    SIMPLE PV112 CAMERA CLASS    ----
 //-----------------------------------------
@@ -182,6 +184,8 @@ private:
     ///		- Sensitivity of the mouse when changing zoom
     static const float zoom_sensitivity;
 
+    static const float step;
+
     /// angle_direction is an angle in which determines into which direction in xz plane I look.
     ///		- 0 degrees .. I look in -z direction
     ///		- 90 degrees .. I look in -x direction
@@ -200,6 +204,7 @@ private:
     /// Final position of the eye in world space coordinates, for LookAt or shaders
     glm::vec3 eye_position;
 
+    glm::vec3 my_position;
     /// Last X and Y coordinates of the mouse cursor
     int last_x, last_y;
 
@@ -208,6 +213,7 @@ private:
 
     /// Recomputes 'eye_position' from 'angle_direction', 'angle_elevation', and 'distance'
     void update_eye_pos();
+
 
 public:
     PV112Camera();
@@ -220,6 +226,10 @@ public:
 
     /// Returns the position of the eye in world space coordinates
     glm::vec3 GetEyePosition() const;
+
+    void move(Moving m);
+
+    glm::vec3 getPosition() const;
 };
 
 }

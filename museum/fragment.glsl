@@ -55,6 +55,8 @@ float snoise(vec2 v){
   return 130.0 * dot(m, g);
 }
 
+
+// inspired by http://www.tinysg.de/techGuides/tg1_proceduralMarble.html
 float turbulence(vec2 point, int frequency)
 {
   float val = 0.0;

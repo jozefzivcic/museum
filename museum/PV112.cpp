@@ -686,18 +686,25 @@ const float PV112Camera::max_elevation = 1.5f;
 const float PV112Camera::min_distance = 1.0f;
 const float PV112Camera::angle_sensitivity = 0.008f;
 const float PV112Camera::zoom_sensitivity = 0.003f;
+const float PV112Camera::step = 0.5;
 
 PV112Camera::PV112Camera()
     : angle_direction(0.0f), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false), is_zooming(false)
 {
+    my_position.x = 0.0;
+    my_position.y = 2.0;
+    my_position.z = 5.0;
     update_eye_pos();
 }
 
 void PV112Camera::update_eye_pos()
 {
-    eye_position.x = distance * cosf(angle_elevation) * -sinf(angle_direction);
-    eye_position.y = distance * sinf(angle_elevation);
-    eye_position.z = distance * cosf(angle_elevation) * cosf(angle_direction);
+    // eye_position.x = distance * cosf(angle_elevation) * -sinf(angle_direction);
+    // eye_position.y = distance * sinf(angle_elevation);
+    // eye_position.z = distance * cosf(angle_elevation) * cosf(angle_direction);
+    eye_position.x = 2*cosf(angle_elevation) * -sinf(angle_direction);
+    eye_position.y = 2*sinf(angle_elevation);
+    eye_position.z = 2*cosf(angle_elevation) * cosf(angle_direction);
 }
 
 void PV112Camera::OnMouseButtonChanged(int button, int state, int x, int y)
@@ -754,7 +761,33 @@ void PV112Camera::OnMouseMoved(int x, int y)
 
 glm::vec3 PV112Camera::GetEyePosition() const
 {
-    return eye_position;
+    return my_position + eye_position;
+}
+
+void PV112Camera::move(Moving m) {
+  switch (m) {
+    case Moving::FORWARD:
+      my_position.x -= sinf(angle_direction) * step;
+      my_position.z += cosf(angle_direction) * step;
+      break;
+    case Moving::BACKWARD:
+      my_position.x += sinf(angle_direction) * step;
+      my_position.z -= cosf(angle_direction) * step;
+      break;
+    case Moving::LEFT:
+      my_position.z += sinf(angle_direction) * step;
+      my_position.x += cosf(angle_direction) * step;
+      break;
+    case Moving::RIGHT:
+      my_position.z -= sinf(angle_direction) * step;
+      my_position.x -= cosf(angle_direction) * step;
+      break;
+  }
+  update_eye_pos();
+}
+
+glm::vec3 PV112Camera::getPosition() const {
+  return my_position;
 }
 
 }
