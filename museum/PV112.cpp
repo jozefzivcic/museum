@@ -689,10 +689,10 @@ const float PV112Camera::zoom_sensitivity = 0.003f;
 const float PV112Camera::step = 0.5;
 
 PV112Camera::PV112Camera()
-    : angle_direction(0.0f), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false), is_zooming(false)
+    : angle_direction(glm::radians(180.0)), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false), is_zooming(false)
 {
     my_position.x = 0.0;
-    my_position.y = 2.0;
+    my_position.y = 3.0;
     my_position.z = 5.0;
     update_eye_pos();
 }

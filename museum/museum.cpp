@@ -43,13 +43,13 @@ GLuint paving_tex;
 GLuint mona_lisa_tex;
 GLuint painting_frame_tex;
 GLuint bronze_tex;
+GLuint night_watch_tex;
+GLuint school_of_athens_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
 
 glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
-
-glm::vec3 my_position = glm::vec3(0.0,2.0,5.0);
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -151,6 +151,8 @@ void init()
   mona_lisa_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/mona_lisa.jpg"));
   painting_frame_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/painting_frame.png"));
   bronze_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/bronze.jpg"));
+  night_watch_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/night_watch_rembrandt.jpg"));
+  school_of_athens_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/school_of_athens_raphael.jpg"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -189,6 +191,24 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, bronze_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, night_watch_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, school_of_athens_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -282,23 +302,73 @@ void renderLight() {
 }
 
 void renderPictures(const glm::mat4& PV_matrix) {
+  const float spaceBetweenPaintings = size_vector.z / 5.0;
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, mona_lisa_tex);
   glUniform1i(storage.getMyTex(), 0);
 
+  float ratio = 4.0/3.0;
+  float x_size = 1.8;
+
+  // mona lisa
   glm::mat4 model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 3.0,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size * ratio,0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
   glUniform1i(storage.getMyTex(), 0);
 
+  float factor = 1.2;
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0,0.0,1.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(size_vector.y, 0.0, -size_vector.z / 2.0 + 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(4.0,3.0,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size * ratio * factor, x_size * factor,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, night_watch_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  //night_watch
+  ratio = 1,20251938;
+  x_size = 2.6;
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + x_size * 2.0 , size_vector.y, -size_vector.x / 2.0 + 0.1));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  factor = 1.3;
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  //school_of_athens
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, school_of_athens_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  ratio = 1,287605295;
+  x_size = 2.6;
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + spaceBetweenPaintings * 2 , size_vector.y, -size_vector.x / 2.0 + 0.1));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, painting_frame_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  factor = 1.3;
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 }
 
