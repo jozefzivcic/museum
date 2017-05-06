@@ -33,6 +33,7 @@ PV112Geometry my_cube;
 PV112Geometry my_rectangle;
 PV112Geometry statue_of_liberty;
 PV112Geometry marble_statue;
+PV112Geometry cup;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -47,6 +48,7 @@ GLuint night_watch_tex;
 GLuint school_of_athens_tex;
 GLuint fall_of_icarus_tex;
 GLuint water_lilies_tex;
+GLuint wood_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -147,6 +149,7 @@ void init()
   my_rectangle = CreateRectangle(position_loc, normal_loc, tex_coord_loc);
   statue_of_liberty = LoadOBJ("./obj_files/statue_of_liberty.obj", position_loc, normal_loc, tex_coord_loc);
   marble_statue = LoadOBJ("./obj_files/marble_statue.obj", position_loc, normal_loc, tex_coord_loc);
+  cup = LoadOBJ("./obj_files/cup.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -157,6 +160,7 @@ void init()
   school_of_athens_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/school_of_athens_raphael.jpg"));
   fall_of_icarus_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/fall_of_icarus.jpg"));
   water_lilies_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/water_lilies.jpg"));
+  wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wood.jpg"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -231,6 +235,15 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, water_lilies_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -444,20 +457,44 @@ void renderStatues(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   glBindVertexArray(statue_of_liberty.VAO);
+  float phi = asin(size_vector.z / sqrt(pow(size_vector.x, 2) + pow(size_vector.z, 2)));
+  float move_z = sqrt(pow(size_vector.x, 2) + pow(size_vector.z, 2)) / 2.0 - 5.0;
+  float move_x = sqrt(pow(move_z, 2) + pow(move_z, 2) - 2 * pow(move_z,2) * cos(phi - glm::radians(45.0))) + 1.0;
   glm::mat4 model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)),
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(45.0)),
   glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, - size_vector.x / 2.0 + 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(3.0, 3.0, 3.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(move_x, 0.0, -move_z));
+  model_matrix = glm::scale(model_matrix, glm::vec3(5.0, 5.0, 5.0));
   sendDataToShaders(PV_matrix, model_matrix);
   DrawGeometry(statue_of_liberty);
 
+  // busta
+  float distance = size_vector.z / 5;
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(my_cube.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.0, -size_vector.z / 2.0 + 2.0 + distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.9, 1.5, 0.9));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+
   glBindVertexArray(marble_statue.VAO);
   model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 1.0, 0.0));
-  //model_matrix = glm::scale(model_matrix, glm::vec3(3.0, 3.0, 3.0));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(size_vector.z / 2.0 - 2.0 - distance , 2.4, -size_vector.x / 2.0 + 2.0));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
   DrawGeometry(marble_statue);
+
+  // golden cup
+  glBindVertexArray(cup.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::rotate(model_matrix, app_time_s, glm::vec3(0.0, 1.0, 0.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(cup);
   //glBindVertexArray(0);
 }
 
@@ -486,7 +523,7 @@ void render()
 
   // Cube
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, wall_tex);
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
   glUniform1i(storage.getMyTex(), 0);
 
   glBindVertexArray(my_cube.VAO);
