@@ -123,5 +123,5 @@ void main()
         mat_diffuse * light_diffuse_color * Idiff +
         mat_specular * light_specular_color * Ispec;
 
-    final_color = vec4(light, 1.0);
+    final_color = vec4(light, alpha);
 }

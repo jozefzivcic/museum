@@ -164,7 +164,7 @@ void init()
   water_lilies_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/water_lilies.jpg"));
   wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wood.jpg"));
   cup_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/cup_tex.jpg"));
-  glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass.png"));
+  glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass2.png"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -508,27 +508,6 @@ void renderStatues(const glm::mat4& PV_matrix) {
 
   // golden cup
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, wood_tex);
-  glUniform1i(storage.getMyTex(), 0);
-
-  glBindVertexArray(my_cube.VAO);
-  model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.2, -size_vector.z / 2.0 + 2.0 + 2 * distance));
-  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 1.2, 1.4));
-  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
-  DrawGeometry(my_cube);
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, glass_tex);
-  glUniform1i(storage.getMyTex(), 0);
-
-  model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 4.4, -size_vector.z / 2.0 + 2.0 + 2 * distance));
-  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 2.0, 1.4));
-  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
-  DrawGeometry(my_cube);
-
-  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, cup_tex);
   glUniform1i(storage.getMyTex(), 0);
 
@@ -539,6 +518,38 @@ void renderStatues(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, app_time_s / 3.0f, glm::vec3(0.0, 1.0, 0.0));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(cup);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(my_cube.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.2, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 1.2, 1.4));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+
+  glBindVertexArray(my_cube.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 0.3, 1.4));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, glass_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  // glass around cup - uses alpha blending
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 4.4, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 2.0, 1.4));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+  glDisable(GL_BLEND);
   //glBindVertexArray(0);
 }
 
