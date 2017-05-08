@@ -51,6 +51,7 @@ GLuint water_lilies_tex;
 GLuint wood_tex;
 GLuint cup_tex;
 GLuint glass_tex;
+GLuint door_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -165,6 +166,7 @@ void init()
   wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wood.jpg"));
   cup_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/cup_tex.jpg"));
   glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass2.png"));
+  door_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/door.jpg"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -273,6 +275,15 @@ void init()
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, door_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
@@ -342,6 +353,18 @@ void renderRoom(const glm::mat4& PV_matrix) {
   float ratio = size_vector.z / size_vector.x;
   int repeat = 5;
   renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
+
+  //door_tex
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, door_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  float factor = 2.064891847;
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 4.0, size_vector.z / 2.0 -0.1));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0 * factor,0));
+  renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
   //glBindVertexArray(0);
 }
 
