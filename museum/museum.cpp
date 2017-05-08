@@ -49,6 +49,8 @@ GLuint school_of_athens_tex;
 GLuint fall_of_icarus_tex;
 GLuint water_lilies_tex;
 GLuint wood_tex;
+GLuint cup_tex;
+GLuint glass_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -161,6 +163,8 @@ void init()
   fall_of_icarus_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/fall_of_icarus.jpg"));
   water_lilies_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/water_lilies.jpg"));
   wood_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wood.jpg"));
+  cup_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/cup_tex.jpg"));
+  glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass.png"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -244,6 +248,24 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, wood_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, cup_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, glass_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -485,11 +507,36 @@ void renderStatues(const glm::mat4& PV_matrix) {
   DrawGeometry(marble_statue);
 
   // golden cup
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(my_cube.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.2, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 1.2, 1.4));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, glass_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 4.4, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 2.0, 1.4));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(my_cube);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, cup_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
   glBindVertexArray(cup.VAO);
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.0, -size_vector.z / 2.0 + 2.0 + distance * 2));
-  model_matrix = glm::rotate(model_matrix, app_time_s, glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.3, -size_vector.z / 2.0 + 2.0 + distance * 2));
+  model_matrix = glm::rotate(model_matrix, app_time_s / 3.0f, glm::vec3(0.0, 1.0, 0.0));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(cup);
   //glBindVertexArray(0);
