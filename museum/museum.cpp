@@ -34,6 +34,7 @@ PV112Geometry my_rectangle;
 PV112Geometry statue_of_liberty;
 PV112Geometry marble_statue;
 PV112Geometry cup;
+PV112Geometry clocks;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -52,6 +53,7 @@ GLuint wood_tex;
 GLuint cup_tex;
 GLuint glass_tex;
 GLuint door_tex;
+GLuint clock_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -153,6 +155,7 @@ void init()
   statue_of_liberty = LoadOBJ("./obj_files/statue_of_liberty.obj", position_loc, normal_loc, tex_coord_loc);
   marble_statue = LoadOBJ("./obj_files/marble_statue.obj", position_loc, normal_loc, tex_coord_loc);
   cup = LoadOBJ("./obj_files/cup.obj", position_loc, normal_loc, tex_coord_loc);
+  clocks = LoadOBJ("./obj_files/clocks.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -167,6 +170,7 @@ void init()
   cup_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/cup_tex.jpg"));
   glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass2.png"));
   door_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/door.jpg"));
+  clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -284,6 +288,15 @@ void init()
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, clock_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
@@ -301,8 +314,10 @@ const int& procedural_tex_type = 0) {
 
 void renderRectangle(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
   float tex_repeat_factor_x, float tex_repeat_factor_y) {
+  glBindVertexArray(my_rectangle.VAO);
   sendDataToShaders(PV_matrix, model_matrix, tex_repeat_factor_x, tex_repeat_factor_y);
   DrawGeometry(my_rectangle);
+  //glBindVertexArray(0);
 }
 
 void renderRoom(const glm::mat4& PV_matrix) {
@@ -365,6 +380,19 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0 * factor,0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
+
+  //clocks
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, clock_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(clocks.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.1));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.8, 0.8, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0);
+  DrawGeometry(clocks);
   //glBindVertexArray(0);
 }
 
