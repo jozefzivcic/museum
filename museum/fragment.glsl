@@ -98,6 +98,9 @@ void main()
     if (procedural_tex_type == 1) {
       tex_color = get_marble_color();
       alpha = 1.0;
+    } else if(procedural_tex_type == 2){
+      tex_color = vec3(0.0, 0.0, 0.0);
+      alpha = 1.0;
     }
 
     if (alpha == 0.0)

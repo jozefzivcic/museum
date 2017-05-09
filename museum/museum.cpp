@@ -15,7 +15,7 @@
 // Include the most important GLM functions
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include "museumclock.h"
 
 using namespace std;
 using namespace PV112;
@@ -59,6 +59,7 @@ GLuint clock_tex;
 float app_time_s = 0.0f;
 
 glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
+MuseumClock museumClock;
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -380,19 +381,6 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0 * factor,0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
-
-  //clocks
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, clock_tex);
-  glUniform1i(storage.getMyTex(), 0);
-
-  glBindVertexArray(clocks.VAO);
-  model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.1));
-  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(0.8, 0.8, 1.0));
-  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0);
-  DrawGeometry(clocks);
   //glBindVertexArray(0);
 }
 
@@ -604,6 +592,51 @@ void renderStatues(const glm::mat4& PV_matrix) {
   //glBindVertexArray(0);
 }
 
+void renderClock(const glm::mat4& PV_matrix) {
+  museumClock.updateClock();
+
+  glBindVertexArray(clocks.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.1));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.8, 0.8, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
+  DrawGeometry(clocks);
+
+  float const_move = static_cast<float>(glm::radians(90.0));
+  //minute hand
+  glBindVertexArray(my_rectangle.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.25));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::rotate(model_matrix, museumClock.getMinuteAngle() + const_move, glm::vec3(0.0, 0.0, 1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.5, 0.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 0.05, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 2);
+  DrawGeometry(my_rectangle);
+
+  //hour hand
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.2));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::rotate(model_matrix, museumClock.getHourAngle() + const_move, glm::vec3(0.0, 0.0, 1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.5, 0.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.7, 0.08, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 2);
+  DrawGeometry(my_rectangle);
+
+  //second hand
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.25 * size_vector.x, 1.25 * size_vector.y, size_vector.z / 2.0 - 0.25));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::rotate(model_matrix, museumClock.getSecondAngle() + const_move, glm::vec3(0.0, 0.0, 1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.6, 0.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 0.02, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 2);
+  DrawGeometry(my_rectangle);
+  //glBindVertexArray(0);
+}
+
 void render()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -626,6 +659,7 @@ void render()
   renderRoom(PV_matrix);
   renderPictures(PV_matrix);
   renderStatues(PV_matrix);
+  renderClock(PV_matrix);
 
   // Cube
   glActiveTexture(GL_TEXTURE0);
