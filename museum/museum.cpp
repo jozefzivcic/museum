@@ -42,6 +42,7 @@ PV112Geometry marble_statue;
 PV112Geometry cup;
 PV112Geometry clocks;
 PV112Geometry statue;
+PV112Geometry lion;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -166,6 +167,7 @@ void init()
   cup = LoadOBJ("./obj_files/cup.obj", position_loc, normal_loc, tex_coord_loc);
   clocks = LoadOBJ("./obj_files/clocks.obj", position_loc, normal_loc, tex_coord_loc);
   statue = LoadOBJ("./obj_files/statue.obj", position_loc, normal_loc, tex_coord_loc);
+  lion = LoadOBJ("./obj_files/lion.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -625,6 +627,17 @@ void renderStatues(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0, 1.0, 0.0));
   sendDataToShaders(PV_matrix, model_matrix);
   DrawGeometry(statue);
+
+  // lion
+  glBindVertexArray(lion.VAO);
+  model_matrix = glm::mat4(1.0f);
+  // model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.0, -size_vector.z / 2.0 + 2.0 + 4 * distance));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(170.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.2, 0.2, 0.2));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
+  DrawGeometry(lion);
   //glBindVertexArray(0);
 }
 
