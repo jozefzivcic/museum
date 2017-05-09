@@ -17,6 +17,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "museumclock.h"
 
+//irrKlang
+//#include "./irrKlang/include/irrKlang.h"
+//using namespace irrklang;
+
+#pragma comment(lib, "./irrKlang/lib/Winx64-visualStudio/irrKlang.lib") // link with irrKlang.dll
+
 using namespace std;
 using namespace PV112;
 
@@ -35,6 +41,7 @@ PV112Geometry statue_of_liberty;
 PV112Geometry marble_statue;
 PV112Geometry cup;
 PV112Geometry clocks;
+PV112Geometry statue;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -54,12 +61,13 @@ GLuint cup_tex;
 GLuint glass_tex;
 GLuint door_tex;
 GLuint clock_tex;
-
+GLuint statue_tex;
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
 
 glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
 MuseumClock museumClock;
+//ISoundEngine* engine;
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -157,6 +165,7 @@ void init()
   marble_statue = LoadOBJ("./obj_files/marble_statue.obj", position_loc, normal_loc, tex_coord_loc);
   cup = LoadOBJ("./obj_files/cup.obj", position_loc, normal_loc, tex_coord_loc);
   clocks = LoadOBJ("./obj_files/clocks.obj", position_loc, normal_loc, tex_coord_loc);
+  statue = LoadOBJ("./obj_files/statue.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -172,6 +181,10 @@ void init()
   glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass2.png"));
   door_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/door.jpg"));
   clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
+  statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
+
+  //irrklang
+  //engine= createIrrKlangDevice();
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -291,6 +304,15 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, clock_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, statue_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -589,6 +611,20 @@ void renderStatues(const glm::mat4& PV_matrix) {
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(my_cube);
   glDisable(GL_BLEND);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, statue_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  // statue
+  glBindVertexArray(statue.VAO);
+  model_matrix = glm::mat4(1.0f);
+  // model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 0.0, -size_vector.z / 2.0 + 2.0 + 3 * distance));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0, 1.0, 0.0));
+  sendDataToShaders(PV_matrix, model_matrix);
+  DrawGeometry(statue);
   //glBindVertexArray(0);
 }
 
