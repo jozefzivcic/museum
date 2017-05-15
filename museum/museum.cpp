@@ -18,8 +18,8 @@
 #include "museumclock.h"
 
 //irrKlang
-//#include "./irrKlang/include/irrKlang.h"
-//using namespace irrklang;
+#include <irrKlang.h>
+using namespace irrklang;
 
 #pragma comment(lib, "./irrKlang/lib/Winx64-visualStudio/irrKlang.lib") // link with irrKlang.dll
 
@@ -73,7 +73,8 @@ float app_time_s = 0.0f;
 
 glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
 MuseumClock museumClock;
-//ISoundEngine* engine;
+ISoundEngine* engine;
+ISound* music;
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -196,7 +197,14 @@ void init()
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
   spotlight_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/spotlight_texture.jpg"));
   //irrklang
-  //engine= createIrrKlangDevice();
+  engine= createIrrKlangDevice();
+  if (!engine)
+    return;
+  music = engine->play3D("./buraky.mp3", vec3df(0,0,0), true, false, true);
+  if (!music)
+    return;
+  music->setMinDistance(1.0f);
+  music->setPosition(vec3df(0.0, 2.0, 0.0));
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -790,13 +798,17 @@ void render()
   projection_matrix = glm::perspective(glm::radians(50.0f),
         float(win_width) / float(win_height), 0.1f, 100.0f);
 
-  view_matrix = glm::lookAt(my_camera.getPosition(),
-        my_camera.GetEyePosition(), glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::vec3 position = my_camera.getPosition();
+  glm::vec3 eye_direction = my_camera.GetEyePosition();
+  view_matrix = glm::lookAt(position,
+        eye_direction, glm::vec3(0.0f, 1.0f, 0.0f));
 
   glUniform3fv(storage.getEyePosition(), 1, glm::value_ptr(my_camera.getPosition()));
 
   glm::mat4 PV_matrix = projection_matrix * view_matrix;
 
+  eye_direction = -eye_direction;
+  engine->setListenerPosition(vec3df(position.x, position.y, position.z), vec3df(eye_direction.x, eye_direction.y, eye_direction.z));
   renderLight(PV_matrix);
   renderLamps(PV_matrix);
   renderRoom(PV_matrix);
@@ -893,6 +905,8 @@ int main(int argc, char ** argv)
 
     // Run the main loop
     glutMainLoop();
-
+    if (music)
+      music->drop();
+    engine->drop();
     return 0;
 }
