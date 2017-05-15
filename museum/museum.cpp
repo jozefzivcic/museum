@@ -43,6 +43,7 @@ PV112Geometry cup;
 PV112Geometry clocks;
 PV112Geometry statue;
 PV112Geometry lion;
+PV112Geometry spotlight;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -64,6 +65,7 @@ GLuint door_tex;
 GLuint clock_tex;
 GLuint statue_tex;
 GLuint ceiling_tex;
+GLuint silver_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -170,6 +172,7 @@ void init()
   clocks = LoadOBJ("./obj_files/clocks.obj", position_loc, normal_loc, tex_coord_loc);
   statue = LoadOBJ("./obj_files/statue.obj", position_loc, normal_loc, tex_coord_loc);
   lion = LoadOBJ("./obj_files/lion.obj", position_loc, normal_loc, tex_coord_loc);
+  spotlight = LoadOBJ("./obj_files/spotlight.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -187,7 +190,7 @@ void init()
   clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
   statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
-
+  silver_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/silver.jpg"));
   //irrklang
   //engine= createIrrKlangDevice();
 
@@ -334,6 +337,15 @@ void init()
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, silver_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
@@ -447,17 +459,17 @@ void renderLight() {
   glUniform1f(storage.getMaterialShininess(), 40.0f);
 
   // spotlight
-  float distance = size_vector.z / 5;
-  glUniform3f( glGetUniformLocation( program, "spotLight.position" ), -size_vector.x / 2.0 + 2.0, 7.0, -size_vector.z / 2.0 + 2.0 + distance * 2 );
-  glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), 0.0f, -1.0f, 0.0f);
-  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
-  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
-  glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
-  glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
+  // float distance = size_vector.z / 5;
+  // glUniform3f( glGetUniformLocation( program, "spotLight.position" ), -size_vector.x / 2.0 + 2.0, 7.0, -size_vector.z / 2.0 + 2.0 + distance * 2 );
+  // glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), 0.0f, -1.0f, 0.0f);
+  // glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
+  // glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
+  // glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
+  // glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
+  // glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
+  // glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
+  // glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
+  // glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
 }
 
 void renderPictures(const glm::mat4& PV_matrix) {
@@ -725,6 +737,34 @@ void renderClock(const glm::mat4& PV_matrix) {
   //glBindVertexArray(0);
 }
 
+void renderLamps(const glm::mat4& PV_matrix) {
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, silver_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(spotlight.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  glm::vec3 light_pos = glm::vec3(0.0, size_vector.y * 2.0-0.35, - size_vector.z / 2.0 + size_vector.z / 14.0);
+  model_matrix = glm::translate(model_matrix, light_pos);
+  // model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(spotlight);
+
+  glm::vec3 light_point = glm::vec3(0.0, size_vector.y * 1.1, -size_vector.z / 2.0 + 0.1);
+  glm::vec3 light_direction = light_point - light_pos;
+  glUniform3f( glGetUniformLocation( program, "spotLight.position" ), light_pos.x-0.01, light_pos.y + 0.1, light_pos.z - 0.2);
+  glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), light_direction.x, light_direction.y, light_direction.z);
+  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
+  glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
+}
+
 void render()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -744,6 +784,7 @@ void render()
   glm::mat4 PV_matrix = projection_matrix * view_matrix;
 
   renderLight();
+  renderLamps(PV_matrix);
   renderRoom(PV_matrix);
   renderPictures(PV_matrix);
   renderStatues(PV_matrix);
