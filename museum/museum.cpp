@@ -44,6 +44,7 @@ PV112Geometry clocks;
 PV112Geometry statue;
 PV112Geometry lion;
 PV112Geometry spotlight;
+PV112Geometry bear;
 
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
@@ -65,7 +66,7 @@ GLuint door_tex;
 GLuint clock_tex;
 GLuint statue_tex;
 GLuint ceiling_tex;
-GLuint silver_tex;
+GLuint spotlight_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -159,7 +160,9 @@ void init()
       WaitForEnterAndExit();
 
   initVariables();
-
+  glm::vec2 bottom(-size_vector.x / 2.0 + size_vector.x / 4.0, -size_vector.z / 2.0 + size_vector.z / 8.0);
+  glm::vec2 top(size_vector.x / 2.0 - size_vector.x / 4.0, size_vector.z / 2.0 - size_vector.z / 12.0);
+  my_camera.setBarrier(bottom,top);
   int position_loc = glGetAttribLocation(program, "position");
   int normal_loc = glGetAttribLocation(program, "normal");
   int tex_coord_loc = glGetAttribLocation(program, "tex_coord");
@@ -173,6 +176,7 @@ void init()
   statue = LoadOBJ("./obj_files/statue.obj", position_loc, normal_loc, tex_coord_loc);
   lion = LoadOBJ("./obj_files/lion.obj", position_loc, normal_loc, tex_coord_loc);
   spotlight = LoadOBJ("./obj_files/spotlight.obj", position_loc, normal_loc, tex_coord_loc);
+  bear = LoadOBJ("./obj_files/bear.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -190,7 +194,7 @@ void init()
   clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
   statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
-  silver_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/silver.jpg"));
+  spotlight_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/spotlight_texture.jpg"));
   //irrklang
   //engine= createIrrKlangDevice();
 
@@ -338,7 +342,7 @@ void init()
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glBindTexture(GL_TEXTURE_2D, silver_tex);
+  glBindTexture(GL_TEXTURE_2D, spotlight_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -446,8 +450,8 @@ void renderRoom(const glm::mat4& PV_matrix) {
   //glBindVertexArray(0);
 }
 
-void renderLight() {
-  glm::vec4 light_pos =  glm::vec4(-15.0f, 10.0f, 0.0f, 1.0f);
+void renderLight(const glm::mat4& PV_matrix) {
+  glm::vec4 light_pos =  glm::vec4(size_vector.x / 2.0 - 2.0, size_vector.y * 2.0, 0.0f, 1.0f);
   glUniform4fv(storage.getLightPosition(), 1, glm::value_ptr(light_pos));
   glUniform3f(storage.getLightAmbientColor(), 0.3f, 0.3f, 0.3f);
   glUniform3f(storage.getLightDiffuseColor(), 1.0f, 1.0f, 1.0f);
@@ -457,6 +461,16 @@ void renderLight() {
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, wood_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(my_cube.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(light_pos.x, light_pos.y, light_pos.z));
+  sendDataToShaders(PV_matrix, model_matrix);
+  DrawGeometry(my_cube);
 
   // spotlight
   // float distance = size_vector.z / 5;
@@ -739,7 +753,7 @@ void renderClock(const glm::mat4& PV_matrix) {
 
 void renderLamps(const glm::mat4& PV_matrix) {
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, silver_tex);
+  glBindTexture(GL_TEXTURE_2D, spotlight_tex);
   glUniform1i(storage.getMyTex(), 0);
 
   glBindVertexArray(spotlight.VAO);
@@ -783,7 +797,7 @@ void render()
 
   glm::mat4 PV_matrix = projection_matrix * view_matrix;
 
-  renderLight();
+  renderLight(PV_matrix);
   renderLamps(PV_matrix);
   renderRoom(PV_matrix);
   renderPictures(PV_matrix);

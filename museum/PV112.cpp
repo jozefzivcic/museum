@@ -689,7 +689,7 @@ const float PV112Camera::zoom_sensitivity = 0.003f;
 const float PV112Camera::step = 0.5;
 
 PV112Camera::PV112Camera()
-    : angle_direction(glm::radians(180.0)), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false), is_zooming(false)
+    : angle_direction(glm::radians(180.0)), angle_elevation(0.0f), distance(5.0f), last_x(0), last_y(0), is_rotating(false), is_zooming(false), barrier(false)
 {
     my_position.x = 0.0;
     my_position.y = 3.0;
@@ -765,22 +765,39 @@ glm::vec3 PV112Camera::GetEyePosition() const
 }
 
 void PV112Camera::move(Moving m) {
+  float x,z;
   switch (m) {
     case Moving::FORWARD:
-      my_position.x -= sinf(angle_direction) * step;
-      my_position.z += cosf(angle_direction) * step;
+      x = my_position.x - sinf(angle_direction) * step;
+      z = my_position.z + cosf(angle_direction) * step;
+      if (barrier && !checkPosition(x, z))
+        break;
+      my_position.x = x;
+      my_position.z = z;
       break;
     case Moving::BACKWARD:
-      my_position.x += sinf(angle_direction) * step;
-      my_position.z -= cosf(angle_direction) * step;
+      x = my_position.x + sinf(angle_direction) * step;
+      z = my_position.z - cosf(angle_direction) * step;
+      if (barrier && !checkPosition(x, z))
+        break;
+      my_position.x = x;
+      my_position.z = z;
       break;
     case Moving::LEFT:
-      my_position.z += sinf(angle_direction) * step;
-      my_position.x += cosf(angle_direction) * step;
+      x = my_position.x + cosf(angle_direction) * step;
+      z = my_position.z + sinf(angle_direction) * step;
+      if (barrier && !checkPosition(x, z))
+        break;
+      my_position.x = x;
+      my_position.z = z;
       break;
     case Moving::RIGHT:
-      my_position.z -= sinf(angle_direction) * step;
-      my_position.x -= cosf(angle_direction) * step;
+      x = my_position.x - cosf(angle_direction) * step;
+      z = my_position.z - sinf(angle_direction) * step;
+      if (barrier && !checkPosition(x, z))
+        break;
+      my_position.x = x;
+      my_position.z = z;
       break;
   }
   update_eye_pos();
@@ -788,6 +805,20 @@ void PV112Camera::move(Moving m) {
 
 glm::vec3 PV112Camera::getPosition() const {
   return my_position;
+}
+
+void PV112Camera::setBarrier(const glm::vec2& bottom, const glm::vec2& top) {
+  barrier = true;
+  barrierBottom = bottom;
+  barrierTop = top;
+}
+
+bool PV112Camera::checkPosition(float x, float z) {
+  if (x < barrierBottom.x || z < barrierBottom.y)
+    return false;
+  if (x > barrierTop.x || z > barrierTop.y)
+    return false;
+  return true;
 }
 
 }

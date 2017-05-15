@@ -214,6 +214,11 @@ private:
     /// Recomputes 'eye_position' from 'angle_direction', 'angle_elevation', and 'distance'
     void update_eye_pos();
 
+    bool barrier;
+
+    glm::vec2 barrierBottom;
+
+    glm::vec2 barrierTop;
 
 public:
     PV112Camera();
@@ -230,6 +235,11 @@ public:
     void move(Moving m);
 
     glm::vec3 getPosition() const;
+
+    void setBarrier(const glm::vec2& bottom, const glm::vec2& top);
+
+private:
+    bool checkPosition(float x, float z);
 };
 
 }
