@@ -63,6 +63,8 @@ GLuint glass_tex;
 GLuint door_tex;
 GLuint clock_tex;
 GLuint statue_tex;
+GLuint ceiling_tex;
+
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
 
@@ -184,6 +186,7 @@ void init()
   door_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/door.jpg"));
   clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
   statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
+  ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
 
   //irrklang
   //engine= createIrrKlangDevice();
@@ -322,6 +325,15 @@ void init()
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, ceiling_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void sendDataToShaders(const glm::mat4& PV_matrix, const glm::mat4& model_matrix,
@@ -394,10 +406,24 @@ void renderRoom(const glm::mat4& PV_matrix) {
   int repeat = 5;
   renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
 
+  // ceiling
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, ceiling_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y * 2, 0.0));
+  model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(1.0,0.0,0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,0));
+  ratio = size_vector.z / size_vector.x;
+  repeat = 5;
+  renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
+
   //door_tex
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, door_tex);
   glUniform1i(storage.getMyTex(), 0);
+
 
   float factor = 2.064891847;
   model_matrix = glm::mat4(1.0f);
@@ -409,7 +435,7 @@ void renderRoom(const glm::mat4& PV_matrix) {
 }
 
 void renderLight() {
-  glm::vec4 light_pos =  glm::vec4(0.0f, 10.0f, 0.0f, 1.0f);
+  glm::vec4 light_pos =  glm::vec4(-15.0f, 10.0f, 0.0f, 1.0f);
   glUniform4fv(storage.getLightPosition(), 1, glm::value_ptr(light_pos));
   glUniform3f(storage.getLightAmbientColor(), 0.3f, 0.3f, 0.3f);
   glUniform3f(storage.getLightDiffuseColor(), 1.0f, 1.0f, 1.0f);
@@ -419,6 +445,19 @@ void renderLight() {
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
+
+  // spotlight
+  float distance = size_vector.z / 5;
+  glUniform3f( glGetUniformLocation( program, "spotLight.position" ), -size_vector.x / 2.0 + 2.0, 7.0, -size_vector.z / 2.0 + 2.0 + distance * 2 );
+  glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), 0.0f, -1.0f, 0.0f);
+  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
+  glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
+  glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
 }
 
 void renderPictures(const glm::mat4& PV_matrix) {

@@ -22,6 +22,57 @@ uniform sampler2D my_tex;
 
 uniform int procedural_tex_type;
 
+struct SpotLight
+{
+  vec3 position;
+  vec3 direction;
+  float cutOff;
+  float outerCutOff;
+
+  float constant;
+  float linear;
+  float quadratic;
+
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+};
+
+uniform SpotLight spotLight;
+
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 mat_diffuse )
+{
+    vec3 lightDir = normalize( light.position - fragPos );
+    viewDir = normalize(fragPos - light.position);
+
+    // Diffuse shading
+    float diff = max( dot( normal, lightDir ), 0.0 );
+
+    // Specular shading
+    vec3 reflectDir = reflect( -lightDir, normal );
+    float spec = pow( max( dot( viewDir, reflectDir ), 0.0 ), material_shininess );
+
+    // Attenuation
+    float distance = length( light.position - fragPos );
+    float attenuation = 1 / ( light.constant + light.linear * distance + light.quadratic * ( distance * distance ) );
+
+    // Spotlight intensity
+    float theta = dot( lightDir, normalize( -light.direction ) );
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp( ( theta - light.outerCutOff ) / epsilon, 0.0, 1.0 );
+
+    // Combine results
+    vec3 ambient = light.ambient * mat_diffuse;
+    vec3 diffuse = light.diffuse * diff * mat_diffuse;
+    vec3 specular = light.specular * spec * material_specular_color;
+
+    ambient *= attenuation * intensity;
+    diffuse *= attenuation * intensity;
+    specular *= attenuation * intensity;
+
+    return (ambient + diffuse + specular);
+}
+
 // This following two functions permute and snoise are taken from:
 // https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83#simplex-noise
 // Simplex 2D noise
@@ -126,5 +177,5 @@ void main()
         mat_diffuse * light_diffuse_color * Idiff +
         mat_specular * light_specular_color * Ispec;
 
-    final_color = vec4(light, alpha);
+    final_color = vec4(light, alpha) + vec4(CalcSpotLight(spotLight, VS_normal_ws, VS_position_ws, Eye, mat_diffuse ), 0.0);
 }
