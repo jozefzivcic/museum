@@ -45,7 +45,7 @@ PV112Geometry statue;
 PV112Geometry lion;
 PV112Geometry spotlight;
 PV112Geometry bear;
-
+PV112Geometry speaker;
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
 
@@ -67,6 +67,7 @@ GLuint clock_tex;
 GLuint statue_tex;
 GLuint ceiling_tex;
 GLuint spotlight_tex;
+GLuint speaker_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -75,6 +76,7 @@ glm::vec3 size_vector = glm::vec3(20.0, 5.0, 40.0);
 MuseumClock museumClock;
 ISoundEngine* engine;
 ISound* music;
+glm::vec3 soundPosition = glm::vec3(0.0, 0.5, -size_vector.z / 2.0 + 0.5);
 
 // Called when the user presses a key
 void key_pressed(unsigned char key, int mouseX, int mouseY)
@@ -178,6 +180,7 @@ void init()
   lion = LoadOBJ("./obj_files/lion.obj", position_loc, normal_loc, tex_coord_loc);
   spotlight = LoadOBJ("./obj_files/spotlight.obj", position_loc, normal_loc, tex_coord_loc);
   bear = LoadOBJ("./obj_files/bear.obj", position_loc, normal_loc, tex_coord_loc);
+  speaker = LoadOBJ("./obj_files/speaker.obj", position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -196,15 +199,16 @@ void init()
   statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
   spotlight_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/spotlight_texture.jpg"));
+  speaker_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/speaker.jpg"));
+
   //irrklang
   engine= createIrrKlangDevice();
   if (!engine)
     return;
-  music = engine->play3D("./buraky.mp3", vec3df(0,0,0), true, false, true);
+  music = engine->play3D("./bach.ogg", vec3df(soundPosition.x, soundPosition.y + 1.0, soundPosition.z), true, false, true);
   if (!music)
     return;
-  music->setMinDistance(1.0f);
-  music->setPosition(vec3df(0.0, 2.0, 0.0));
+  music->setMinDistance(3.0f);
 
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -351,6 +355,15 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, spotlight_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, speaker_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -768,7 +781,6 @@ void renderLamps(const glm::mat4& PV_matrix) {
   glm::mat4 model_matrix = glm::mat4(1.0f);
   glm::vec3 light_pos = glm::vec3(0.0, size_vector.y * 2.0-0.35, - size_vector.z / 2.0 + size_vector.z / 14.0);
   model_matrix = glm::translate(model_matrix, light_pos);
-  // model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(spotlight);
@@ -785,6 +797,18 @@ void renderLamps(const glm::mat4& PV_matrix) {
   glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
   glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
   glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
+}
+
+void renderSpeaker(const glm::mat4& PV_matrix) {
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, speaker_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(speaker.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, soundPosition);
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  DrawGeometry(speaker);
 }
 
 void render()
@@ -809,6 +833,7 @@ void render()
 
   eye_direction = -eye_direction;
   engine->setListenerPosition(vec3df(position.x, position.y, position.z), vec3df(eye_direction.x, eye_direction.y, eye_direction.z));
+  renderSpeaker(PV_matrix);
   renderLight(PV_matrix);
   renderLamps(PV_matrix);
   renderRoom(PV_matrix);
