@@ -399,35 +399,33 @@ void renderRoom(const glm::mat4& PV_matrix) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, wall_tex);
   glUniform1i(storage.getMyTex(), 0);
-  //  glEnable(GL_CULL_FACE);
-  //  glCullFace(GL_BACK);
 
   //left wall
   glm::mat4 model_matrix;
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y, 0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y, 1.0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // right wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y,1.0));
   renderRectangle(PV_matrix, model_matrix,  2.0, 2.0);
 
   // back wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,1.0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // front wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,1.0));
   renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
 
   // bottom paving
@@ -438,7 +436,7 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(1.0,0.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,1.0));
   float ratio = size_vector.z / size_vector.x;
   int repeat = 5;
   renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
@@ -451,7 +449,7 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y * 2, 0.0));
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(1.0,0.0,0.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,1.0));
   ratio = size_vector.z / size_vector.x;
   repeat = 5;
   renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
@@ -466,7 +464,7 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 4.0, size_vector.z / 2.0 -0.1));
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(180.0)), glm::vec3(0.0, 1.0, 0.0));
-  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0 * factor,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0 * factor,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
   //glBindVertexArray(0);
 }
@@ -482,16 +480,16 @@ void renderLight(const glm::mat4& PV_matrix) {
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, wood_tex);
-  glUniform1i(storage.getMyTex(), 0);
-
-  glBindVertexArray(my_cube.VAO);
-  glm::mat4 model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(light_pos.x, light_pos.y, light_pos.z));
-  sendDataToShaders(PV_matrix, model_matrix);
-  DrawGeometry(my_cube);
+  //
+  // glActiveTexture(GL_TEXTURE0);
+  // glBindTexture(GL_TEXTURE_2D, wood_tex);
+  // glUniform1i(storage.getMyTex(), 0);
+  //
+  // glBindVertexArray(my_cube.VAO);
+  // glm::mat4 model_matrix = glm::mat4(1.0f);
+  // model_matrix = glm::translate(model_matrix, glm::vec3(light_pos.x, light_pos.y, light_pos.z));
+  // sendDataToShaders(PV_matrix, model_matrix);
+  // DrawGeometry(my_cube);
 
   // spotlight
   // float distance = size_vector.z / 5;
@@ -519,7 +517,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   // mona lisa
   glm::mat4 model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size * ratio,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size * ratio,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -530,7 +528,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0,0.0,1.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(size_vector.y, 0.0, -size_vector.z / 2.0 + 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size * ratio * factor, x_size * factor,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size * ratio * factor, x_size * factor,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -543,7 +541,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + x_size * 2.0 , size_vector.y, -size_vector.x / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -552,7 +550,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
 
   factor = 1.3;
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   //school_of_athens
@@ -565,7 +563,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + spaceBetweenPaintings * 2 , size_vector.y, -size_vector.x / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -574,7 +572,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
 
   factor = 1.3;
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   //fall_of_icarus
@@ -587,7 +585,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + spaceBetweenPaintings * 3.2 , size_vector.y, -size_vector.x / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -596,7 +594,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
 
   factor = 1.3;
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   //water_lilies
@@ -609,7 +607,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(-90.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.z / 2.0 + spaceBetweenPaintings * 4.35 , size_vector.y, -size_vector.x / 2.0 + 0.1));
-  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(x_size, x_size / ratio,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   glActiveTexture(GL_TEXTURE0);
@@ -618,7 +616,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
 
   factor = 1.3;
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 }
 
