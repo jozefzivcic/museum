@@ -46,6 +46,9 @@ PV112Geometry lion;
 PV112Geometry spotlight;
 PV112Geometry bear;
 PV112Geometry speaker;
+PV112Geometry lamp;
+PV112Geometry sphere;
+
 // Simple camera that allows us to look at the object from different views
 PV112Camera my_camera;
 
@@ -181,6 +184,8 @@ void init()
   spotlight = LoadOBJ("./obj_files/spotlight.obj", position_loc, normal_loc, tex_coord_loc);
   bear = LoadOBJ("./obj_files/bear.obj", position_loc, normal_loc, tex_coord_loc);
   speaker = LoadOBJ("./obj_files/speaker.obj", position_loc, normal_loc, tex_coord_loc);
+  lamp = LoadOBJ("./obj_files/flat_light.obj", position_loc, normal_loc, tex_coord_loc);
+  sphere = CreateSphere(position_loc, normal_loc, tex_coord_loc);
 
   wall_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/wall.jpg"));
   paving_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/paving.jpg"));
@@ -470,39 +475,35 @@ void renderRoom(const glm::mat4& PV_matrix) {
 }
 
 void renderLight(const glm::mat4& PV_matrix) {
-  glm::vec4 light_pos =  glm::vec4(size_vector.x / 2.0 - 2.0, size_vector.y * 2.0, 0.0f, 1.0f);
+  // glm::vec4 light_pos =  glm::vec4(size_vector.x / 2.0 - 2.0, size_vector.y * 2.0, 0.0f, 1.0f);
+  glm::vec4 light_pos =  glm::vec4(0.0f, size_vector.y * 2.0- 0.7, 0.0f, 1.0f);
   glUniform4fv(storage.getLightPosition(), 1, glm::value_ptr(light_pos));
-  glUniform3f(storage.getLightAmbientColor(), 0.3f, 0.3f, 0.3f);
-  glUniform3f(storage.getLightDiffuseColor(), 1.0f, 1.0f, 1.0f);
-  glUniform3f(storage.getLightSpecularColor(), 1.0f, 1.0f, 1.0f);
+  glUniform3f(storage.getLightAmbientColor(), 0.2f, 0.2f, 0.2f);
+  glUniform3f(storage.getLightDiffuseColor(), 0.4f, 0.4f, 0.4f);
+  glUniform3f(storage.getLightSpecularColor(), 0.2f, 0.2f, 0.2f);
 
   glUniform3f(storage.getMaterialAmbientColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialDiffuseColor(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getMaterialSpecularColor(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getMaterialShininess(), 40.0f);
-  //
-  // glActiveTexture(GL_TEXTURE0);
-  // glBindTexture(GL_TEXTURE_2D, wood_tex);
-  // glUniform1i(storage.getMyTex(), 0);
-  //
-  // glBindVertexArray(my_cube.VAO);
-  // glm::mat4 model_matrix = glm::mat4(1.0f);
-  // model_matrix = glm::translate(model_matrix, glm::vec3(light_pos.x, light_pos.y, light_pos.z));
-  // sendDataToShaders(PV_matrix, model_matrix);
-  // DrawGeometry(my_cube);
 
-  // spotlight
-  // float distance = size_vector.z / 5;
-  // glUniform3f( glGetUniformLocation( program, "spotLight.position" ), -size_vector.x / 2.0 + 2.0, 7.0, -size_vector.z / 2.0 + 2.0 + distance * 2 );
-  // glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), 0.0f, -1.0f, 0.0f);
-  // glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
-  // glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
-  // glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
-  // glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
-  // glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
-  // glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
-  // glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
-  // glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, spotlight_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(lamp.VAO);
+  glm::mat4 model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y * 2.0 - 0.11, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(0.3, 0.3, 0.3));
+  sendDataToShaders(PV_matrix, model_matrix);
+  DrawGeometry(lamp);
+
+  glBindVertexArray(sphere.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y * 2.0 + 1.84, 0.02));
+  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0, 2.0));
+  sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 3);
+  DrawGeometry(sphere);
 }
 
 void renderPictures(const glm::mat4& PV_matrix) {
@@ -679,7 +680,7 @@ void renderStatues(const glm::mat4& PV_matrix) {
 
   glBindVertexArray(my_cube.VAO);
   model_matrix = glm::mat4(1.0f);
-  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.705, -size_vector.z / 2.0 + 2.0 + 2 * distance));
   model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 0.3, 1.4));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
   DrawGeometry(my_cube);
@@ -695,7 +696,14 @@ void renderStatues(const glm::mat4& PV_matrix) {
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 4.4, -size_vector.z / 2.0 + 2.0 + 2 * distance));
   model_matrix = glm::scale(model_matrix, glm::vec3(1.4, 2.0, 1.4));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 0);
+  glDepthMask(GL_FALSE);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
   DrawGeometry(my_cube);
+  glCullFace(GL_BACK);
+  DrawGeometry(my_cube);
+  glDisable(GL_CULL_FACE);
+  glDepthMask(GL_TRUE);
   glDisable(GL_BLEND);
 
   glActiveTexture(GL_TEXTURE0);
@@ -787,8 +795,8 @@ void renderLamps(const glm::mat4& PV_matrix) {
   glm::vec3 light_direction = light_point - light_pos;
   glUniform3f( glGetUniformLocation( program, "spotLight.position" ), light_pos.x-0.01, light_pos.y + 0.1, light_pos.z - 0.2);
   glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), light_direction.x, light_direction.y, light_direction.z);
-  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.8f, 0.8f, 0.8f );
-  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.4f, 0.4f, 0.4f );
+  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f);
   glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
   glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
   glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
@@ -831,6 +839,7 @@ void render()
 
   eye_direction = -eye_direction;
   engine->setListenerPosition(vec3df(position.x, position.y, position.z), vec3df(eye_direction.x, eye_direction.y, eye_direction.z));
+
   renderSpeaker(PV_matrix);
   renderLight(PV_matrix);
   renderLamps(PV_matrix);

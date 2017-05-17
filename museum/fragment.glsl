@@ -152,6 +152,9 @@ void main()
     } else if(procedural_tex_type == 2){
       tex_color = vec3(0.0, 0.0, 0.0);
       alpha = 1.0;
+    } else if (procedural_tex_type == 3) {
+      tex_color = normalize(vec3(255.0, 255.0, 204.0));
+      alpha = 1.0;
     }
 
     if (alpha == 0.0)

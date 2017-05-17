@@ -17,11 +17,11 @@ void MuseumClock::updateClock() {
 }
 
 float MuseumClock::getHourAngle() const {
-  return static_cast<float>(glm::radians(-30.0f * hour));
+  return static_cast<float>(glm::radians(-30.0f * hour - 0.1 * minute));
 }
 
 float MuseumClock::getMinuteAngle() const {
-  return static_cast<float>(glm::radians(-6.0f * minute));
+  return static_cast<float>(glm::radians(-6.0f * minute - 0.1 * second));
 }
 
 float MuseumClock::getSecondAngle() const {
