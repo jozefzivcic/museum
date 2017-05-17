@@ -66,7 +66,6 @@ GLuint wood_tex;
 GLuint cup_tex;
 GLuint glass_tex;
 GLuint door_tex;
-GLuint clock_tex;
 GLuint statue_tex;
 GLuint ceiling_tex;
 GLuint spotlight_tex;
@@ -200,7 +199,6 @@ void init()
   cup_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/cup_tex.jpg"));
   glass_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/glass2.png"));
   door_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/door.jpg"));
-  clock_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/clock_tex.jpg"));
   statue_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/statue_tex.tga"));
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
   spotlight_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/spotlight_texture.jpg"));
@@ -332,15 +330,6 @@ void init()
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glBindTexture(GL_TEXTURE_2D, clock_tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
   glBindTexture(GL_TEXTURE_2D, statue_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -411,27 +400,29 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y, 1.0));
-  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
+  float ratio = size_vector.x / size_vector.y;
+  renderRectangle(PV_matrix, model_matrix, 2.0 * ratio, 2.0);
 
   // right wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.x / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x, size_vector.y,1.0));
-  renderRectangle(PV_matrix, model_matrix,  2.0, 2.0);
+  renderRectangle(PV_matrix, model_matrix,  2.0 * ratio, 2.0);
 
   // back wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,1.0));
-  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
+  ratio = (size_vector.x / 2.0) / size_vector.y;
+  renderRectangle(PV_matrix, model_matrix, 2.0 * ratio, 2.0);
 
   // front wall
   model_matrix = glm::mat4(1.0f);
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(180.0), glm::vec3(0.0,1.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, size_vector.y, -size_vector.z / 2.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.y,1.0));
-  renderRectangle(PV_matrix, model_matrix, 2.0, 2.0);
+  renderRectangle(PV_matrix, model_matrix, 2.0 * ratio, 2.0);
 
   // bottom paving
   glActiveTexture(GL_TEXTURE0);
@@ -442,7 +433,7 @@ void renderRoom(const glm::mat4& PV_matrix) {
   model_matrix = glm::rotate(model_matrix, (float)glm::radians(-90.0), glm::vec3(1.0,0.0,0.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(size_vector.x / 2.0, size_vector.z / 2.0,1.0));
-  float ratio = size_vector.z / size_vector.x;
+  ratio = size_vector.z / size_vector.x;
   int repeat = 5;
   renderRectangle(PV_matrix, model_matrix, repeat, repeat * ratio);
 
@@ -475,7 +466,6 @@ void renderRoom(const glm::mat4& PV_matrix) {
 }
 
 void renderLight(const glm::mat4& PV_matrix) {
-  // glm::vec4 light_pos =  glm::vec4(size_vector.x / 2.0 - 2.0, size_vector.y * 2.0, 0.0f, 1.0f);
   glm::vec4 light_pos =  glm::vec4(0.0f, size_vector.y * 2.0- 0.7, 0.0f, 1.0f);
   glUniform4fv(storage.getLightPosition(), 1, glm::value_ptr(light_pos));
   glUniform3f(storage.getLightAmbientColor(), 0.2f, 0.2f, 0.2f);
