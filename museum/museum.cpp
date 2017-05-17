@@ -540,8 +540,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   factor = 1.3;
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.138 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   //school_of_athens
@@ -562,8 +561,7 @@ void renderPictures(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   factor = 1.3;
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
-  model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(factor*1.0005, factor*1.134*1.0005 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
   //fall_of_icarus
@@ -584,7 +582,6 @@ void renderPictures(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   factor = 1.3;
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
   model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 
@@ -606,7 +603,6 @@ void renderPictures(const glm::mat4& PV_matrix) {
   glUniform1i(storage.getMyTex(), 0);
 
   factor = 1.3;
-  model_matrix = glm::translate(model_matrix, glm::vec3(0.0, 0.0, 0.2));
   model_matrix = glm::scale(model_matrix, glm::vec3(factor, factor*1.14 ,1.0));
   renderRectangle(PV_matrix, model_matrix, 1.0, 1.0);
 }
@@ -837,17 +833,7 @@ void render()
   renderPictures(PV_matrix);
   renderStatues(PV_matrix);
   renderClock(PV_matrix);
-
-  // Cube
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, wood_tex);
-  glUniform1i(storage.getMyTex(), 0);
-
-  glBindVertexArray(my_cube.VAO);
-  model_matrix = glm::mat4(1.0f);
-  sendDataToShaders(PV_matrix, model_matrix);
-  DrawGeometry(my_cube);
-
+  
   glBindVertexArray(0);
   glUseProgram(0);
 
