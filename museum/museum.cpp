@@ -152,6 +152,18 @@ void initVariables() {
   storage.setTexRepeatXLocation(glGetUniformLocation(program, "tex_repeat_factor_x"));
   storage.setTexRepeatYLocation(glGetUniformLocation(program, "tex_repeat_factor_y"));
   storage.setProceduralTexType(glGetUniformLocation(program, "procedural_tex_type"));
+
+  // spotlight
+  storage.setSpotlightPositionLocation(glGetUniformLocation(program, "spotLight.position"));
+  storage.setSpotlightDirectionLocation(glGetUniformLocation(program, "spotLight.direction"));
+  storage.setSpotlightAmbientLocation(glGetUniformLocation(program, "spotLight.ambient"));
+  storage.setSpotlightDiffuseLocation(glGetUniformLocation(program, "spotLight.diffuse"));
+  storage.setSpotlightSpecularLocation(glGetUniformLocation(program, "spotLight.specular"));
+  storage.setSpotlightConstantLocation(glGetUniformLocation(program, "spotLight.constant"));
+  storage.setSpotlightLinearLocation(glGetUniformLocation(program, "spotLight.linear"));
+  storage.setSpotlightQuadraticLocation(glGetUniformLocation(program, "spotLight.quadratic"));
+  storage.setSpotlightCutOffLocation(glGetUniformLocation(program, "spotLight.cutOff"));
+  storage.setSpotlightOuterCutOffLocation(glGetUniformLocation(program, "spotLight.outerCutOff"));
 }
 
 void init()
@@ -671,7 +683,6 @@ void renderStatues(const glm::mat4& PV_matrix) {
   // statue
   glBindVertexArray(statue.VAO);
   model_matrix = glm::mat4(1.0f);
-  // model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
   model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 0.0, -size_vector.z / 2.0 + 2.0 + 3 * distance));
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0, 1.0, 0.0));
@@ -681,14 +692,13 @@ void renderStatues(const glm::mat4& PV_matrix) {
   // lion
   glBindVertexArray(lion.VAO);
   model_matrix = glm::mat4(1.0f);
-  // model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 6.7, -size_vector.z / 2.0 + 2.0 + 2 * distance));
   model_matrix = glm::scale(model_matrix, glm::vec3(1.0, 1.0, 1.0));
   model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 1.0, -size_vector.z / 2.0 + 2.0 + 4 * distance));
   model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(170.0)), glm::vec3(0.0, 1.0, 0.0));
   model_matrix = glm::scale(model_matrix, glm::vec3(0.2, 0.2, 0.2));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
   DrawGeometry(lion);
-  
+
   // golden cup
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, cup_tex);
@@ -804,16 +814,16 @@ void renderLamps(const glm::mat4& PV_matrix) {
 
   glm::vec3 light_point = glm::vec3(0.0, size_vector.y * 1.1, -size_vector.z / 2.0 + 0.1);
   glm::vec3 light_direction = light_point - light_pos;
-  glUniform3f( glGetUniformLocation( program, "spotLight.position" ), light_pos.x-0.01, light_pos.y + 0.1, light_pos.z - 0.2);
-  glUniform3f( glGetUniformLocation( program, "spotLight.direction" ), light_direction.x, light_direction.y, light_direction.z);
-  glUniform3f( glGetUniformLocation( program, "spotLight.ambient" ), 0.4f, 0.4f, 0.4f );
-  glUniform3f( glGetUniformLocation( program, "spotLight.diffuse" ), 1.0f, 1.0f, 1.0f);
-  glUniform3f( glGetUniformLocation( program, "spotLight.specular" ), 1.0f, 1.0f, 1.0f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.constant" ), 1.0f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.linear" ), 0.09f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.quadratic" ), 0.032f );
-  glUniform1f( glGetUniformLocation( program, "spotLight.cutOff" ), glm::cos( glm::radians( 15.0f ) ) );
-  glUniform1f( glGetUniformLocation( program, "spotLight.outerCutOff" ), glm::cos( glm::radians( 20.0f ) ) );
+  glUniform3f(storage.getSpotlightPositionLocation(), light_pos.x-0.01, light_pos.y + 0.1, light_pos.z - 0.2);
+  glUniform3f(storage.getSpotlightDirectionLocation(), light_direction.x, light_direction.y, light_direction.z);
+  glUniform3f(storage.getSpotlightAmbientLocation(), 0.4f, 0.4f, 0.4f);
+  glUniform3f(storage.getSpotlightDiffuseLocation(), 1.0f, 1.0f, 1.0f);
+  glUniform3f(storage.getSpotlightSpecularLocation(), 1.0f, 1.0f, 1.0f);
+  glUniform1f(storage.getSpotlightConstantLocation(), 1.0f);
+  glUniform1f(storage.getSpotlightLinearLocation(), 0.09f);
+  glUniform1f(storage.getSpotlightQuadraticLocation(), 0.032f);
+  glUniform1f(storage.getSpotlightCutOffLocation(), glm::cos(glm::radians(20.0f)));
+  glUniform1f(storage.getSpotlightOuterCutOffLocation(), glm::cos(glm::radians(25.0f)));
 }
 
 void renderSpeaker(const glm::mat4& PV_matrix) {

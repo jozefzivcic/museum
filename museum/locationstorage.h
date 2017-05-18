@@ -27,7 +27,18 @@ private:
   GLint tex_repeat_y_loc;
 
   GLint tex_procedural_type;
-  
+
+  GLint spotLight_position;
+  GLint spotLight_direction;
+  GLint spotLight_ambient;
+  GLint spotLight_diffuse;
+  GLint spotLight_specular;
+  GLint spotLight_constant;
+  GLint spotLight_linear;
+  GLint spotLight_quadratic;
+  GLint spotLight_cutOff;
+  GLint spotLight_outerCutOff;
+
 public:
   LocationStorage();
   ~LocationStorage();
@@ -95,5 +106,46 @@ public:
   GLint getProceduralTexType() const;
 
   void setProceduralTexType(const GLint& location);
+
+// spotLight
+  GLint getSpotlightPositionLocation() const;
+
+  void setSpotlightPositionLocation(const GLint& location);
+
+  GLint getSpotlightDirectionLocation() const;
+
+  void setSpotlightDirectionLocation(const GLint& location);
+
+  GLint getSpotlightAmbientLocation() const;
+
+  void setSpotlightAmbientLocation(const GLint& location);
+
+  GLint getSpotlightDiffuseLocation() const;
+
+  void setSpotlightDiffuseLocation(const GLint& location);
+
+  GLint getSpotlightSpecularLocation() const;
+
+  void setSpotlightSpecularLocation(const GLint& location);
+
+  GLint getSpotlightConstantLocation() const;
+
+  void setSpotlightConstantLocation(const GLint& location);
+
+  GLint getSpotlightLinearLocation() const;
+
+  void setSpotlightLinearLocation(const GLint& location);
+
+  GLint getSpotlightQuadraticLocation() const;
+
+  void setSpotlightQuadraticLocation(const GLint& location);
+
+  GLint getSpotlightCutOffLocation() const;
+
+  void setSpotlightCutOffLocation(const GLint& location);
+
+  GLint getSpotlightOuterCutOffLocation() const;
+
+  void setSpotlightOuterCutOffLocation(const GLint& location);
 };
 #endif

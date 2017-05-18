@@ -130,3 +130,84 @@ GLint LocationStorage::getProceduralTexType() const {
 void LocationStorage::setProceduralTexType(const GLint& location) {
   tex_procedural_type = location;
 }
+
+// spotlight
+GLint LocationStorage::getSpotlightPositionLocation() const {
+  return spotLight_position;
+}
+
+void LocationStorage::setSpotlightPositionLocation(const GLint& location) {
+  spotLight_position = location;
+}
+
+GLint LocationStorage::getSpotlightDirectionLocation() const {
+  return spotLight_direction;
+}
+
+void LocationStorage::setSpotlightDirectionLocation(const GLint& location) {
+  spotLight_direction = location;
+}
+
+GLint LocationStorage::getSpotlightAmbientLocation() const {
+  return spotLight_ambient;
+}
+
+void LocationStorage::setSpotlightAmbientLocation(const GLint& location) {
+  spotLight_ambient = location;
+}
+
+GLint LocationStorage::getSpotlightDiffuseLocation() const {
+  return spotLight_diffuse;
+}
+
+void LocationStorage::setSpotlightDiffuseLocation(const GLint& location) {
+  spotLight_diffuse = location;
+}
+
+GLint LocationStorage::getSpotlightSpecularLocation() const {
+  return spotLight_specular;
+}
+
+void LocationStorage::setSpotlightSpecularLocation(const GLint& location) {
+  spotLight_specular = location;
+}
+
+GLint LocationStorage::getSpotlightConstantLocation() const {
+  return spotLight_constant;
+}
+
+void LocationStorage::setSpotlightConstantLocation(const GLint& location) {
+  spotLight_constant = location;
+}
+
+GLint LocationStorage::getSpotlightLinearLocation() const {
+  return spotLight_linear;
+}
+
+void LocationStorage::setSpotlightLinearLocation(const GLint& location) {
+  spotLight_linear = location;
+}
+
+GLint LocationStorage::getSpotlightQuadraticLocation() const {
+  return spotLight_quadratic;
+}
+
+void LocationStorage::setSpotlightQuadraticLocation(const GLint& location) {
+  spotLight_quadratic = location;
+}
+
+GLint LocationStorage::getSpotlightCutOffLocation() const {
+  return spotLight_cutOff;
+}
+
+void LocationStorage::setSpotlightCutOffLocation(const GLint& location) {
+  spotLight_cutOff = location;
+}
+
+GLint LocationStorage::getSpotlightOuterCutOffLocation() const {
+  return spotLight_outerCutOff;
+}
+
+void LocationStorage::setSpotlightOuterCutOffLocation(const GLint& location) {
+  spotLight_outerCutOff = location;
+}
