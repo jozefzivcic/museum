@@ -40,26 +40,26 @@ struct SpotLight
 
 uniform SpotLight spotLight;
 
-vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 mat_diffuse )
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 mat_diffuse)
 {
-    vec3 lightDir = normalize( light.position - fragPos );
+    vec3 lightDir = normalize(light.position - fragPos);
     viewDir = normalize(fragPos - light.position);
 
     // Diffuse shading
-    float diff = max( dot( normal, lightDir ), 0.0 );
+    float diff = max(dot(normal, lightDir), 0.0);
 
     // Specular shading
-    vec3 reflectDir = reflect( -lightDir, normal );
-    float spec = pow( max( dot( viewDir, reflectDir ), 0.0 ), material_shininess );
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow( max( dot(viewDir, reflectDir), 0.0 ), material_shininess);
 
     // Attenuation
-    float distance = length( light.position - fragPos );
-    float attenuation = 1 / ( light.constant + light.linear * distance + light.quadratic * ( distance * distance ) );
+    float distance = length(light.position - fragPos);
+    float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     // Spotlight intensity
-    float theta = dot( lightDir, normalize( -light.direction ) );
+    float theta = dot(lightDir, normalize(-light.direction));
     float epsilon = light.cutOff - light.outerCutOff;
-    float intensity = clamp( ( theta - light.outerCutOff ) / epsilon, 0.0, 1.0 );
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
     // Combine results
     vec3 ambient = light.ambient * mat_diffuse;
