@@ -40,20 +40,20 @@ struct SpotLight
 
 uniform SpotLight spotLight;
 
-vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 mat_diffuse)
+vec3 SpotLightColor(SpotLight light, vec3 normal, vec3 fragmentPosition, vec3 mat_diffuse)
 {
-    vec3 lightDir = normalize(light.position - fragPos);
-    viewDir = normalize(fragPos - light.position);
+    vec3 lightDirection = normalize(light.position - fragmentPosition);
+    vec3 viewDirection = normalize(fragmentPosition - light.position);
 
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = max(dot(normal, lightDirection), 0.0);
 
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow( max( dot(viewDir, reflectDir), 0.0 ), material_shininess);
+    vec3 reflectDirection = reflect(-lightDirection, normal);
+    float spec = pow(max(dot(viewDirection, reflectDirection), 0.0), material_shininess);
 
-    float distance = length(light.position - fragPos);
-    float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    float distance = length(light.position - fragmentPosition);
+    float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * distance * distance);
 
-    float theta = dot(lightDir, normalize(-light.direction));
+    float theta = dot(lightDirection, normalize(-light.direction));
     float epsilon = light.cutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
@@ -65,7 +65,8 @@ vec3 CalculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;
 
-    return (ambient + diffuse + specular);
+    vec3 result = ambient + diffuse + specular;
+    return result;
 }
 
 // This following two functions permute and snoise are taken from:
@@ -165,7 +166,6 @@ void main()
     float Idiff = max(dot(N, L), 0.0);
     float Ispec = pow(max(dot(N, H), 0.0), material_shininess) * Idiff;
 
-    // prenasobujeme tex_color, spekularna zlozka sa neprenasobuje
     vec3 mat_ambient = material_ambient_color * tex_color;
     vec3 mat_diffuse = material_diffuse_color * tex_color;
     vec3 mat_specular = material_specular_color;
@@ -175,5 +175,5 @@ void main()
         mat_diffuse * light_diffuse_color * Idiff +
         mat_specular * light_specular_color * Ispec;
 
-    final_color = vec4(light, alpha) + vec4(CalculateSpotLight(spotLight, VS_normal_ws, VS_position_ws, Eye, mat_diffuse ), 0.0);
+    final_color = vec4(light, alpha) + vec4(SpotLightColor(spotLight, VS_normal_ws, VS_position_ws, mat_diffuse), 0.0);
 }
