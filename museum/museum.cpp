@@ -70,6 +70,7 @@ GLuint statue_tex;
 GLuint ceiling_tex;
 GLuint spotlight_tex;
 GLuint speaker_tex;
+GLuint bear_tex;
 
 // Current time of the application in seconds, for animations
 float app_time_s = 0.0f;
@@ -203,6 +204,7 @@ void init()
   ceiling_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/ceiling.jpg"));
   spotlight_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/spotlight_texture.jpg"));
   speaker_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/speaker.jpg"));
+  bear_tex = CreateAndLoadTexture(MAYBEWIDE("./textures/bear_wood.jpg"));
 
   //irrklang
   engine= createIrrKlangDevice();
@@ -358,6 +360,15 @@ void init()
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glBindTexture(GL_TEXTURE_2D, speaker_tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 8.0f);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glBindTexture(GL_TEXTURE_2D, bear_tex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -716,6 +727,19 @@ void renderStatues(const glm::mat4& PV_matrix) {
   model_matrix = glm::scale(model_matrix, glm::vec3(0.2, 0.2, 0.2));
   sendDataToShaders(PV_matrix, model_matrix, 1.0, 1.0, 1);
   DrawGeometry(lion);
+
+  // bear
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, bear_tex);
+  glUniform1i(storage.getMyTex(), 0);
+
+  glBindVertexArray(bear.VAO);
+  model_matrix = glm::mat4(1.0f);
+  model_matrix = glm::translate(model_matrix, glm::vec3(-size_vector.x / 2.0 + 2.0, 0.0, -size_vector.z / 2.0 + 2.0 + 2.5 * distance));
+  model_matrix = glm::rotate(model_matrix, static_cast<float>(glm::radians(90.0)), glm::vec3(0.0, 1.0, 0.0));
+  model_matrix = glm::scale(model_matrix, glm::vec3(2.0, 2.0, 2.0));
+  sendDataToShaders(PV_matrix, model_matrix, 5.0, 5.0);
+  DrawGeometry(bear);
   //glBindVertexArray(0);
 }
 
@@ -833,7 +857,7 @@ void render()
   renderPictures(PV_matrix);
   renderStatues(PV_matrix);
   renderClock(PV_matrix);
-  
+
   glBindVertexArray(0);
   glUseProgram(0);
 
