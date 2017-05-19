@@ -820,8 +820,8 @@ void renderLamps(const glm::mat4& PV_matrix) {
   glUniform3f(storage.getSpotlightDiffuseLocation(), 1.0f, 1.0f, 1.0f);
   glUniform3f(storage.getSpotlightSpecularLocation(), 1.0f, 1.0f, 1.0f);
   glUniform1f(storage.getSpotlightConstantLocation(), 1.0f);
-  glUniform1f(storage.getSpotlightLinearLocation(), 0.09f);
-  glUniform1f(storage.getSpotlightQuadraticLocation(), 0.032f);
+  glUniform1f(storage.getSpotlightLinearLocation(), 0.1f);
+  glUniform1f(storage.getSpotlightQuadraticLocation(), 0.03f);
   glUniform1f(storage.getSpotlightCutOffLocation(), glm::cos(glm::radians(20.0f)));
   glUniform1f(storage.getSpotlightOuterCutOffLocation(), glm::cos(glm::radians(25.0f)));
 }
